@@ -32,7 +32,7 @@ describe('Delegated DAO', () => {
 
     // Deploy token
     const Token = await ethers.getContractFactory('Token')
-    token = await Token.deploy('2000000')
+    token = await Token.deploy(2000000)
 
     // Send tokens to investors - 50% (1M) of total supply, each investor gets 100k tokens
     transaction = await token.connect(deployer).transfer(investor1.address, 100000)

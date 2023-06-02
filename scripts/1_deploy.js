@@ -7,7 +7,7 @@
 const hre = require('hardhat')
 
 async function main() {
-  const MAX_SUPPLY = '1000000'
+  const MAX_SUPPLY = 2000000
 
   // Deploy Token
   const Token = await hre.ethers.getContractFactory('Token')
@@ -15,8 +15,8 @@ async function main() {
 
   await token.deployed()
   console.log(`Token deployed to: ${token.address}`)
-  console.log(`Token supply: ${(await token.totalSupply()).toString()}`)
-  console.log(`Token decimals: ${(await token.decimals()).toString()}\n`)
+  console.log(`Token supply: ${(await token.totalSupply())}`)
+  console.log(`Token decimals: ${(await token.decimals())}\n`)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
