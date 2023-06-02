@@ -14,7 +14,9 @@ async function main() {
   let token = await Token.deploy(MAX_SUPPLY)
 
   await token.deployed()
-  console.log(`Token deployed to: ${token.address}\n`)
+  console.log(`Token deployed to: ${token.address}`)
+  console.log(`Token supply: ${(await token.totalSupply()).toString()}`)
+  console.log(`Token decimals: ${(await token.decimals()).toString()}\n`)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
