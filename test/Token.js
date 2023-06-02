@@ -12,7 +12,7 @@ describe('Token', () => {
 
   beforeEach(async () => {
     const Token = await ethers.getContractFactory('Token')
-    token = await Token.deploy('Crypto Token', 'CT', '1000000')
+    token = await Token.deploy(tokens(1000000))
 
     accounts = await ethers.getSigners()
     deployer = accounts[0]
@@ -21,10 +21,10 @@ describe('Token', () => {
   })
 
   describe('Deployment', () => {
-    const name = 'Crypto Token'
-    const symbol = 'CT'
-    const decimals = '18'
-    const totalSupply = tokens('1000000')
+    const name = 'Crypto Token' // String
+    const symbol = 'CT' // String
+    const decimals = 18 // Number: 18
+    const totalSupply = tokens('1000000') // String: 1000000000000000000000000 || 1e+24
 
     it('has correct name', async () => {
       expect(await token.name()).to.equal(name)
@@ -35,7 +35,7 @@ describe('Token', () => {
     })
 
     it('has correct decimals', async () => {
-      expect(await token.decimals()).to.equal(decimals)
+      expect((await token.decimals())).to.equal(decimals)
     })
 
     it('has correct total supply', async () => {
@@ -53,7 +53,7 @@ describe('Token', () => {
     describe('Success', () => {
       beforeEach(async () => {
         amount = tokens(100)
-        transaction = await token.connect(deployer).transfer(receiver.address, amount)
+        transaction = await token.connect(deployer).transfer(receiver.address, amount.toString())
         result = await transaction.wait()
       })
 
@@ -134,12 +134,12 @@ describe('Token', () => {
         expect(await token.balanceOf(receiver.address)).to.be.equal(amount)
       })
 
-      it('rests the allowance', async () => {
+      it('resets the allowance', async () => {
         expect(await token.allowance(deployer.address, exchange.address)).to.be.equal(0)
       })
 
       it('emits a Transfer event', async () => {
-        const event = result.events[0]
+        const event = result.events[1]
         expect(event.event).to.equal('Transfer')
 
         const args = event.args
