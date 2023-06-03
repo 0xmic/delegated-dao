@@ -1,13 +1,14 @@
-# Sample Hardhat Project
+# Crypto Token (CT) DAO with Delegated Voting
+This project demonstrates a full stack DAO project governed by an ERC-20 token. The DAO contract manages proposals that token holders can vote on to distribute tokens held by the DAO treasury to proposal recipients. The DAO contract allows for token holders to delegate their votes to other DAO members. The front-end allows users to interact with the DAO contract to submit new proposals, delegate votes, vote on proposals, and finalize proposals. Test files and scripts for deployment are included.
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
-
-Try running some of the following tasks:
-
+## Local Testing
+To test the Crowdsale locally, run the following:
 ```shell
-npx hardhat help
-npx hardhat test
-GAS_REPORT=true npx hardhat test
 npx hardhat node
-npx hardhat run scripts/deploy.js
+
+npx hardhat --network localhost scripts/1_deploy.js
+
+npx hardhat --network localhost scripts/2_seed.js
+
+npm run start
 ```

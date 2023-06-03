@@ -1,17 +1,12 @@
 const { expect } = require('chai')
 const { ethers } = require('hardhat')
 
-const tokens = (n) => {
-  return ethers.utils.parseUnits(n.toString(), 'ether')
-}
-
-const ether = tokens
-
 describe('Delegated DAO', () => {
   let token, delegatedDAO
   let accounts, deployer,
       investor1, investor2, investor3, investor4, investor5, investor6,
-      investorDelegate1, investorDelegate2, investorDelegate3, investorDelegate4
+      investorDelegate1, investorDelegate2, investorDelegate3, investorDelegate4,
+      recipient, user
 
   beforeEach(async () => {
     let transaction
@@ -29,6 +24,8 @@ describe('Delegated DAO', () => {
     investorDelegate2 = accounts[8]
     investorDelegate3 = accounts[9]
     investorDelegate4 = accounts[10]
+    recipient = accounts[11]
+    user = accounts[12]
 
     // Deploy token
     const Token = await ethers.getContractFactory('Token')
@@ -86,6 +83,67 @@ describe('Delegated DAO', () => {
     it('returns quorum', async () => {
       expect(await delegatedDAO.quorum()).to.equal(500001)
     })
+  })
+
+  describe('Proposal Creation', () => {
+    let transaction, result
+
+    describe('Success', () => {
+      beforeEach(async () => {
+        transaction = await delegatedDAO
+          .connect(investor1)
+          .createProposal('Proposal 1', 'Develop Website', 10000, recipient.address)
+      })
+
+      it('updates proposal count', async () => {
+        expect(await delegatedDAO.proposalCount()).to.equal(1)
+      })
+
+      it('updates proposal mapping', async () => {
+        const proposal = await delegatedDAO.proposals(1)
+
+        expect(proposal.id).to.equal(1)
+        expect(proposal.title).to.equal('Proposal 1')
+        expect(proposal.description).to.equal('Develop Website')
+        expect(proposal.amount).to.equal(10000)
+        expect(proposal.recipient).to.equal(recipient.address)
+      })
+    })
+
+    describe('Failure', () => {
+      it('rejects invalid amount - not enough funds in DAO', async () => {
+        await expect(delegatedDAO.connect(investor1).createProposal(
+          'Proposal 1', 'Develop Website', 1000001, recipient.address
+        )).to.be.reverted
+      })
+
+      it('rejects non-investor', async () => {
+        await expect(delegatedDAO.connect(user).createProposal(
+          'Proposal 1', 'Develop Website', 10000, recipient.address
+        )).to.be.reverted
+      })
+    })
+
+  })
+
+  describe('Delegate Voting', () => {
+
+  })
+
+  describe('Undelegate Voting', () => {
+
+  })
+
+  describe('Up Voting', () => {
+
+  })
+
+  describe('Down Voting', () => {
+
+  })
+
+  describe('Governance', () => {
+
   })
 
 })
