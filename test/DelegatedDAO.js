@@ -92,7 +92,8 @@ describe('Delegated DAO', () => {
       beforeEach(async () => {
         transaction = await delegatedDAO
           .connect(investor1)
-          .createProposal('Proposal 1', 'Develop Website', 10000, recipient.address)
+          .createProposal('Proposal 1', 'Description 1', 10000, recipient.address)
+        result = await transaction.wait()
       })
 
       it('updates proposal count', async () => {
@@ -104,7 +105,7 @@ describe('Delegated DAO', () => {
 
         expect(proposal.id).to.equal(1)
         expect(proposal.title).to.equal('Proposal 1')
-        expect(proposal.description).to.equal('Develop Website')
+        expect(proposal.description).to.equal('Description 1')
         expect(proposal.amount).to.equal(10000)
         expect(proposal.recipient).to.equal(recipient.address)
       })
@@ -113,13 +114,13 @@ describe('Delegated DAO', () => {
     describe('Failure', () => {
       it('rejects invalid amount - not enough funds in DAO', async () => {
         await expect(delegatedDAO.connect(investor1).createProposal(
-          'Proposal 1', 'Develop Website', 1000001, recipient.address
+          'Proposal 1', 'Description 1', 1000001, recipient.address
         )).to.be.reverted
       })
 
       it('rejects non-investor', async () => {
         await expect(delegatedDAO.connect(user).createProposal(
-          'Proposal 1', 'Develop Website', 10000, recipient.address
+          'Proposal 1', 'Description 1', 10000, recipient.address
         )).to.be.reverted
       })
     })
@@ -127,23 +128,107 @@ describe('Delegated DAO', () => {
   })
 
   describe('Delegate Voting', () => {
-
+    // TODO
   })
 
   describe('Undelegate Voting', () => {
-
+    // TODO
   })
 
   describe('Up Voting', () => {
+    let transaction, result
 
+    beforeEach(async () => {
+      transaction = await delegatedDAO
+        .connect(investor1)
+        .createProposal('Proposal 1', 'Description 1', 50000, recipient.address)
+      result = await transaction.wait()
+    })
+
+    describe('Success', async () => {
+      beforeEach(async () => {
+        transaction = await delegatedDAO.connect(investor1).upVote(1)
+        result = await transaction.wait()
+      })
+
+      it('updates vote count', async () => {
+        const proposal = await delegatedDAO.proposals(1)
+        expect(proposal.votes).to.equal(100000)
+      })
+
+      it('updates voter mapping', async () => {
+        expect(await delegatedDAO.votes(investor1.address, 1)).to.equal(true)
+      })
+
+      it('emits an UpVote event', async () => {
+        await expect(transaction).to.emit(delegatedDAO, 'UpVote').withArgs(1, investor1.address)
+      })
+    })
+
+    describe('Failure', () => {
+      it('rejects non-investor', async () => {
+        await expect(delegatedDAO.connect(user).upVote(1)).to.be.reverted
+      })
+
+      it('rejects double voting', async () => {
+        transaction = await delegatedDAO.connect(investor1).upVote(1)
+        await transaction.wait()
+
+        await expect(delegatedDAO.connect(investor1).upVote(1)).to.be.reverted
+      })
+    })
   })
 
   describe('Down Voting', () => {
+    let transaction, result
 
+    beforeEach(async () => {
+      transaction = await delegatedDAO
+        .connect(investor1)
+        .createProposal('Proposal 1', 'Description 1', 50000, recipient.address)
+      result = await transaction.wait()
+    })
+
+    describe('Success', () => {
+      beforeEach(async () => {
+        transaction = await delegatedDAO.connect(investor1).upVote(1)
+        result = await transaction.wait()
+
+        transaction = await delegatedDAO.connect(investor2).downVote(1)
+        result = await transaction.wait()
+      })
+
+      it('updates vote count', async () => {
+        const proposal = await delegatedDAO.proposals(1)
+        expect(proposal.votes).to.equal(0)
+      })
+
+      it('updates voter mapping', async () => {
+        expect(await delegatedDAO.votes(investor1.address, 1)).to.equal(true)
+        expect(await delegatedDAO.votes(investor2.address, 1)).to.equal(true)
+      })
+
+      it('emits a DownVote event', async () => {
+        await expect(transaction).to.emit(delegatedDAO, 'DownVote').withArgs(1, investor2.address)
+      })
+    })
+
+    describe('Failure', () => {
+      it('rejects non-investor', async () => {
+        await expect(delegatedDAO.connect(user).downVote(1)).to.be.reverted
+      })
+
+      it('rejects double voting', async () => {
+        transaction = await delegatedDAO.connect(investor1).downVote(1)
+        await transaction.wait()
+
+        await expect(delegatedDAO.connect(investor1).downVote(1)).to.be.reverted
+      })
+    })
   })
 
   describe('Governance', () => {
-
+    // TODO
   })
 
 })

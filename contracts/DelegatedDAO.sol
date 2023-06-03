@@ -99,34 +99,50 @@ contract DelegatedDAO {
      * @param _delegatee The address of the delegatee
      */
     function delegateVote(address _delegatee) external onlyInvestor {
-
+        // TODO
     }
 
     /* @notice Undelegate a vote
      * @param _delegatee The address of the delegatee
      */
     function undelegateVote(address _delegatee) external onlyInvestor {
-
+        // TODO
     }
 
     /* @notice Upvote a proposal
      * @param _id The ID of the proposal
      */
     function upVote(uint256 _id) external onlyInvestor {
+        Proposal storage proposal = proposals[_id];
 
+        require(!votes[msg.sender][_id], "Already voted");
+
+        proposal.votes += int(token.balanceOf(msg.sender));
+
+        votes[msg.sender][_id] = true;
+
+        emit UpVote(_id, msg.sender);
     }
 
     /* @notice Downvote a proposal
      * @param _id The ID of the proposal
      */
     function downVote(uint256 _id) external onlyInvestor {
+        Proposal storage proposal = proposals[_id];
 
+        require(!votes[msg.sender][_id], "Already voted");
+
+        proposal.votes -= int(token.balanceOf(msg.sender));
+
+        votes[msg.sender][_id] = true;
+
+        emit DownVote(_id, msg.sender);
     }
 
     /* @notice Finalize a proposal
      * @param _id The ID of the proposal to finalize
      */
     function finalizeProposal(uint256 _id) external onlyInvestor {
-
+        // TODO
     }
 }
