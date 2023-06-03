@@ -228,7 +228,111 @@ describe('Delegated DAO', () => {
   })
 
   describe('Governance', () => {
-    // TODO
+    let transaction, result
+
+    describe('Success', () => {
+      beforeEach(async () => {
+        // Create proposal
+        transaction = await delegatedDAO
+          .connect(investor1)
+          .createProposal('Proposal 1', 'Description 1', 50000, recipient.address)
+        result = await transaction.wait()
+
+        // Up Vote
+        transaction = await delegatedDAO.connect(investor1).upVote(1)
+        result = await transaction.wait()
+
+        transaction = await delegatedDAO.connect(investor2).upVote(1)
+        result = await transaction.wait()
+
+        transaction = await delegatedDAO.connect(investor3).upVote(1)
+        result = await transaction.wait()
+
+        transaction = await delegatedDAO.connect(investor4).upVote(1)
+        result = await transaction.wait()
+
+        transaction = await delegatedDAO.connect(investor5).upVote(1)
+        result = await transaction.wait()
+
+        transaction = await delegatedDAO.connect(investor6).upVote(1)
+        result = await transaction.wait()
+
+        // Finalize proposal
+        transaction = await delegatedDAO.connect(investor1).finalizeProposal(1)
+        result = await transaction.wait()
+      })
+
+      it('transfers funds to the recipient', async () => {
+        expect(await token.balanceOf(recipient.address)).to.equal(50000)
+      })
+
+      it('updates the proposal to finalized', async () => {
+        const proposal = await delegatedDAO.proposals(1)
+        expect(proposal.finalized).to.equal(true)
+      })
+
+      it('emits a Finalize event', async () => {
+        await expect(transaction).to.emit(delegatedDAO, 'Finalize').withArgs(1, recipient.address)
+      })
+    })
+
+    describe('Failure', () => {
+      beforeEach(async () => {
+        // Create proposal
+        transaction = await delegatedDAO
+          .connect(investor1)
+          .createProposal('Proposal 1', 'Description 1', 50000, recipient.address)
+        result = await transaction.wait()
+
+        // Up Vote
+        transaction = await delegatedDAO.connect(investor1).upVote(1)
+        result = await transaction.wait()
+
+        transaction = await delegatedDAO.connect(investor2).upVote(1)
+        result = await transaction.wait()
+
+        transaction = await delegatedDAO.connect(investor3).upVote(1)
+        result = await transaction.wait()
+      })
+
+      it('rejects finalization if not enough votes', async () => {
+        await expect(delegatedDAO.connect(investor1).finalizeProposal(1)).to.be.reverted
+      })
+
+      it('rejects finalization from a non-investor', async () => {
+        // Increase votes to pass quorum
+        transaction = await delegatedDAO.connect(investor4).upVote(1)
+        result = await transaction.wait()
+
+        transaction = await delegatedDAO.connect(investor5).upVote(1)
+        result = await transaction.wait()
+
+        transaction = await delegatedDAO.connect(investor6).upVote(1)
+        result = await transaction.wait()
+
+        // Try to finalize as non-investor
+        await expect(delegatedDAO.connect(user).finalizeProposal(1)).to.be.reverted
+      })
+
+      it('rejects proposal if already finalzied', async () => {
+        // Increase votes to pass quorum
+        transaction = await delegatedDAO.connect(investor4).upVote(1)
+        result = await transaction.wait()
+
+        transaction = await delegatedDAO.connect(investor5).upVote(1)
+        result = await transaction.wait()
+
+        transaction = await delegatedDAO.connect(investor6).upVote(1)
+        result = await transaction.wait()
+
+        // Finalize proposal
+        transaction = await delegatedDAO.connect(investor1).finalizeProposal(1)
+        result = await transaction.wait()
+
+        // Try to finalize again
+        await expect(delegatedDAO.connect(investor1).finalizeProposal(1)).to.be.reverted
+      })
+    })
   })
 
 })

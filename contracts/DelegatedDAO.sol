@@ -143,6 +143,16 @@ contract DelegatedDAO {
      * @param _id The ID of the proposal to finalize
      */
     function finalizeProposal(uint256 _id) external onlyInvestor {
-        // TODO
+        Proposal storage proposal = proposals[_id];
+
+        require(!proposal.finalized, "Already finalized");
+        require(proposal.votes >= int(quorum), "Not enough votes");
+        require(token.balanceOf(address(this)) >= proposal.amount, "Not enough funds");
+
+        require(token.transfer(proposal.recipient, proposal.amount), "Transfer failed");
+
+        proposal.finalized = true;
+
+        emit Finalize(_id, proposal.recipient);
     }
 }
