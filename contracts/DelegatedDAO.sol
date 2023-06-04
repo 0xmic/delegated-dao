@@ -25,39 +25,25 @@ contract DelegatedDAO {
 
     uint256 public proposalCount;
 
-    // KEY: Proposal ID
-    // VALUE: Proposal
-    // Mapping of proposal ID to proposal
+    /* @notice proposal ID to Proposal */
     mapping(uint256 => Proposal) public proposals;
 
-    // KEY: Investor address and Proposal ID
-    // VALUE: Delegatee address
-    // Mapping of investor address to proposal ID to voting power
+    /* @notice Investor address to proposal ID to vote weight cast on proposal */
     mapping(address => mapping(uint256 => uint256)) public votesCast;
 
-    // KEY: Delegator address
-    // VALUE: Delegatee address
-    // Mapping of delegator address to delegatee address
+    /* @notice Delegator address to delegatee address */
     mapping(address => address) public delegatorDelegatee;
 
-    // KEY: Delegatee address and Delegator index
-    // VALUE: Delegator address
-    // Mapping of delegatee address to delegator index to delegator address
+    /* @notice Delegatee address to delegator index to delegator address */
     mapping(address => mapping(uint256 => address)) public delegateeDelegators;
 
-    // KEY: Delegatee address
-    // VALUE: Delegator count
-    // Mapping of delegatee address to delegator count
+    /* @notice Delegatee address to delegator count */
     mapping(address => uint256) public delegateeDelegatorCount;
 
-    // KEY: Delegatee address and Delegator address
-    // VALUE: Delegator index
-    // Mapping of delegatee address to delegator address to delegator index
-    mapping(address => mapping(address => uint256)) public delegatorIndex;
+    /* @notice Delegatee address to delegator address to delegator index */
+    mapping(address => mapping(address => uint256)) public delegateeDelegatorIndex;
 
-    // KEY: Delegatee address
-    // VALUE: Votes received from delegators
-    // Mapping of delegatee address to voting power received from delegators
+    /* @notice Delegatee address to voting power received from delegators */
     mapping(address => uint256) public delegateeVotesReceived;
 
     event Propose(
@@ -73,7 +59,6 @@ contract DelegatedDAO {
 
     event UpVote(uint256 id, address investor);
     event DownVote(uint256 id, address investor);
-
 
     event Finalize(uint256 id, address recipient);
 
@@ -132,10 +117,10 @@ contract DelegatedDAO {
      * @param _delegatee The address of the delegatee
      */
     function delegate(address _delegatee) external onlyInvestor {
-        require(token.balanceOf(msg.sender) > 0, "Must be token holder to delegate");
         require(_delegatee != msg.sender, "Cannot delegate to self");
         require(_delegatee != address(0), "Cannot delegate to 0x0 address");
-        require(token.balanceOf(_delegatee) > 0, "Must be token holder to receive delegation");
+        require(token.balanceOf(_delegatee) > 0, "Cannot delegate to non-investor");
+        require(delegatorDelegatee[msg.sender] == address(0), "Cannot delegate as delegatee (chained delegation)");
 
         if(delegatorDelegatee[msg.sender] != address(0)) {
             undelegate();
@@ -143,7 +128,7 @@ contract DelegatedDAO {
 
         // Delegate votes
         delegateeDelegators[_delegatee][delegateeDelegatorCount[_delegatee]] = msg.sender;
-        delegatorIndex[_delegatee][msg.sender] = delegateeDelegatorCount[_delegatee];
+        delegateeDelegatorIndex[_delegatee][msg.sender] = delegateeDelegatorCount[_delegatee];
         delegateeDelegatorCount[_delegatee]++;
 
         delegateeVotesReceived[_delegatee] += token.balanceOf(msg.sender);
@@ -180,10 +165,10 @@ contract DelegatedDAO {
         }
 
         // Remove delegator from delegateeDelegators
-        uint256 indexToRemove = delegatorIndex[removedDelegatee][msg.sender];
+        uint256 indexToRemove = delegateeDelegatorIndex[removedDelegatee][msg.sender];
         address lastDelegator = delegateeDelegators[removedDelegatee][delegateeDelegatorCount[removedDelegatee] - 1];
         delegateeDelegators[removedDelegatee][indexToRemove] = lastDelegator;
-        delegatorIndex[removedDelegatee][lastDelegator] = indexToRemove;
+        delegateeDelegatorIndex[removedDelegatee][lastDelegator] = indexToRemove;
         delegateeDelegatorCount[removedDelegatee]--;
 
         // Reset delegatorDelegatee to 0x0 address
@@ -211,7 +196,7 @@ contract DelegatedDAO {
 
         proposal.votes += int(voteWeight);
 
-        // Record the votes casted by the voter and all the delegators who delegated to this voter
+        // Record the votes cast by the voter and all the delegators who delegated to this voter
         votesCast[msg.sender][_id] = voteWeight;
         for(uint256 i = 0; i < delegateeDelegatorCount[msg.sender]; i++) {
             address delegator = delegateeDelegators[msg.sender][i];
@@ -240,7 +225,7 @@ contract DelegatedDAO {
 
         proposal.votes -= int(voteWeight);
 
-        // Record the votes casted by the voter and all the delegators who delegated to this voter
+        // Record the votes cast by the voter and all the delegators who delegated to this voter
         votesCast[msg.sender][_id] = voteWeight;
         for(uint256 i = 0; i < delegateeDelegatorCount[msg.sender]; i++) {
             address delegator = delegateeDelegators[msg.sender][i];
