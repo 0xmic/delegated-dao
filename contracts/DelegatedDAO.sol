@@ -24,9 +24,41 @@ contract DelegatedDAO {
     }
 
     uint256 public proposalCount;
+
+    // KEY: Proposal ID
+    // VALUE: Proposal
+    // Mapping of proposal ID to proposal
     mapping(uint256 => Proposal) public proposals;
 
-    mapping(address => mapping(uint256 => bool)) public votes;
+    // KEY: Investor address and Proposal ID
+    // VALUE: Delegatee address
+    // Mapping of investor address to proposal ID to voting power
+    mapping(address => mapping(uint256 => uint256)) public votesCast;
+
+    // KEY: Delegator address
+    // VALUE: Delegatee address
+    // Mapping of delegator address to delegatee address
+    mapping(address => address) public delegatorDelegatee;
+
+    // KEY: Delegatee address and Delegator index
+    // VALUE: Delegator address
+    // Mapping of delegatee address to delegator index to delegator address
+    mapping(address => mapping(uint256 => address)) public delegateeDelegators;
+
+    // KEY: Delegatee address
+    // VALUE: Delegator count
+    // Mapping of delegatee address to delegator count
+    mapping(address => uint256) public delegateeDelegatorCount;
+
+    // KEY: Delegatee address and Delegator address
+    // VALUE: Delegator index
+    // Mapping of delegatee address to delegator address to delegator index
+    mapping(address => mapping(address => uint256)) public delegatorIndex;
+
+    // KEY: Delegatee address
+    // VALUE: Votes received from delegators
+    // Mapping of delegatee address to voting power received from delegators
+    mapping(address => uint256) public delegateeVotesReceived;
 
     event Propose(
         uint256 id,
@@ -36,11 +68,12 @@ contract DelegatedDAO {
         string description
     );
 
-    event DelegateVote(address delegator, address delegatee);
-    event UndelegateVote(address delegator, address delegatee);
+    event Delegate(address indexed from, address indexed to);
+    event Undelegate(address indexed from, address indexed to);
 
     event UpVote(uint256 id, address investor);
     event DownVote(uint256 id, address investor);
+
 
     event Finalize(uint256 id, address recipient);
 
@@ -98,28 +131,92 @@ contract DelegatedDAO {
     /* @notice Delegate a vote
      * @param _delegatee The address of the delegatee
      */
-    function delegateVote(address _delegatee) external onlyInvestor {
-        // TODO
+    function delegate(address _delegatee) external onlyInvestor {
+        require(token.balanceOf(msg.sender) > 0, "Must be token holder to delegate");
+        require(_delegatee != msg.sender, "Cannot delegate to self");
+        require(_delegatee != address(0), "Cannot delegate to 0x0 address");
+        require(token.balanceOf(_delegatee) > 0, "Must be token holder to receive delegation");
+
+        if(delegatorDelegatee[msg.sender] != address(0)) {
+            undelegate();
+        }
+
+        // Delegate votes
+        delegateeDelegators[_delegatee][delegateeDelegatorCount[_delegatee]] = msg.sender;
+        delegatorIndex[_delegatee][msg.sender] = delegateeDelegatorCount[_delegatee];
+        delegateeDelegatorCount[_delegatee]++;
+
+        delegateeVotesReceived[_delegatee] += token.balanceOf(msg.sender);
+
+        // Update delegatee's votes on live proposals
+        for(uint256 i = 1; i <= proposalCount; i++) {
+            // Check if the proposal is live, the delegatee has voted, and the delegator has not
+            if(proposals[i].finalized == false && votesCast[_delegatee][i] > 0 && votesCast[msg.sender][i] == 0) {
+                proposals[i].votes += int(token.balanceOf(msg.sender));
+            }
+        }
+
+        emit Delegate(msg.sender, _delegatee);
     }
 
     /* @notice Undelegate a vote
-     * @param _delegatee The address of the delegatee
      */
-    function undelegateVote(address _delegatee) external onlyInvestor {
-        // TODO
+    function undelegate() public onlyInvestor {
+        require(delegatorDelegatee[msg.sender] != address(0), "Not delegated");
+
+        address removedDelegatee = delegatorDelegatee[msg.sender];
+
+        // Remove delegator's votes from delegateeVotesReceived
+        uint256 voterBalance = token.balanceOf(msg.sender);
+        delegateeVotesReceived[removedDelegatee] -= voterBalance;
+
+        // Remove delegator's votes from live proposals
+        for(uint256 i = 1; i <= proposalCount; i++) {
+            // Check if the proposal is live, and the delegator has voted
+            if(proposals[i].finalized == false && votesCast[msg.sender][i] > 0) {
+                votesCast[removedDelegatee][i] -= voterBalance;
+                proposals[i].votes -= int(voterBalance);
+            }
+        }
+
+        // Remove delegator from delegateeDelegators
+        uint256 indexToRemove = delegatorIndex[removedDelegatee][msg.sender];
+        address lastDelegator = delegateeDelegators[removedDelegatee][delegateeDelegatorCount[removedDelegatee] - 1];
+        delegateeDelegators[removedDelegatee][indexToRemove] = lastDelegator;
+        delegatorIndex[removedDelegatee][lastDelegator] = indexToRemove;
+        delegateeDelegatorCount[removedDelegatee]--;
+
+        // Reset delegatorDelegatee to 0x0 address
+        delete delegatorDelegatee[msg.sender];
+
+        emit Undelegate(msg.sender, removedDelegatee);
     }
 
     /* @notice Upvote a proposal
      * @param _id The ID of the proposal
      */
     function upVote(uint256 _id) external onlyInvestor {
+        require(votesCast[msg.sender][_id] == 0, "Already voted");
+        require(delegatorDelegatee[msg.sender] == address(0), "Delegated vote");
+
         Proposal storage proposal = proposals[_id];
 
-        require(!votes[msg.sender][_id], "Already voted");
+        uint256 voterBalance = token.balanceOf(msg.sender);
+        uint256 voteWeight = voterBalance;
 
-        proposal.votes += int(token.balanceOf(msg.sender));
+        // Add delegated votes if the voter is a delegatee
+        if (delegateeDelegatorCount[msg.sender] > 0) {
+            voteWeight += delegateeVotesReceived[msg.sender];
+        }
 
-        votes[msg.sender][_id] = true;
+        proposal.votes += int(voteWeight);
+
+        // Record the votes casted by the voter and all the delegators who delegated to this voter
+        votesCast[msg.sender][_id] = voteWeight;
+        for(uint256 i = 0; i < delegateeDelegatorCount[msg.sender]; i++) {
+            address delegator = delegateeDelegators[msg.sender][i];
+            votesCast[delegator][_id] = token.balanceOf(delegator);
+        }
 
         emit UpVote(_id, msg.sender);
     }
@@ -128,13 +225,27 @@ contract DelegatedDAO {
      * @param _id The ID of the proposal
      */
     function downVote(uint256 _id) external onlyInvestor {
+        require(votesCast[msg.sender][_id] == 0, "Already voted");
+        require(delegatorDelegatee[msg.sender] == address(0), "Delegated vote");
+
         Proposal storage proposal = proposals[_id];
 
-        require(!votes[msg.sender][_id], "Already voted");
+        uint256 voterBalance = token.balanceOf(msg.sender);
+        uint256 voteWeight = voterBalance;
 
-        proposal.votes -= int(token.balanceOf(msg.sender));
+        // Add delegated votes if the voter is a delegatee
+        if (delegateeDelegatorCount[msg.sender] > 0) {
+            voteWeight += delegateeVotesReceived[msg.sender];
+        }
 
-        votes[msg.sender][_id] = true;
+        proposal.votes -= int(voteWeight);
+
+        // Record the votes casted by the voter and all the delegators who delegated to this voter
+        votesCast[msg.sender][_id] = voteWeight;
+        for(uint256 i = 0; i < delegateeDelegatorCount[msg.sender]; i++) {
+            address delegator = delegateeDelegators[msg.sender][i];
+            votesCast[delegator][_id] = token.balanceOf(delegator);
+        }
 
         emit DownVote(_id, msg.sender);
     }

@@ -157,7 +157,7 @@ describe('Delegated DAO', () => {
       })
 
       it('updates voter mapping', async () => {
-        expect(await delegatedDAO.votes(investor1.address, 1)).to.equal(true)
+        expect(await delegatedDAO.votesCast(investor1.address, 1)).to.equal(100000)
       })
 
       it('emits an UpVote event', async () => {
@@ -204,8 +204,8 @@ describe('Delegated DAO', () => {
       })
 
       it('updates voter mapping', async () => {
-        expect(await delegatedDAO.votes(investor1.address, 1)).to.equal(true)
-        expect(await delegatedDAO.votes(investor2.address, 1)).to.equal(true)
+        expect(await delegatedDAO.votesCast(investor1.address, 1)).to.equal(100000)
+        expect(await delegatedDAO.votesCast(investor2.address, 1)).to.equal(100000)
       })
 
       it('emits a DownVote event', async () => {
