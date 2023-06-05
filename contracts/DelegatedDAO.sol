@@ -122,6 +122,7 @@ contract DelegatedDAO {
         require(token.balanceOf(_delegatee) > 0, "Cannot delegate to non-investor");
         require(delegatorDelegatee[_delegatee] == address(0), "Cannot delegate to delegator (chained delegation)");
         require(delegateeDelegatorCount[msg.sender] == 0, "Cannot delegate votes as delegatee (chained delegation)");
+        require(delegatorDelegatee[msg.sender] == address(0), "Cannot double delegate");
 
         if(delegatorDelegatee[msg.sender] != address(0)) {
             undelegate();

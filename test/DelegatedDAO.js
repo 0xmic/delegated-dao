@@ -152,59 +152,113 @@ describe('Delegated DAO', () => {
       transaction = await delegatedDAO.connect(investor6).delegate(investorDelegate3.address)
       await transaction.wait()
 
-      // 0 investors delgate to investorDelegate4
-      // no transaction needed
+      // 0 investors delgate to investorDelegate4 - no transaction needed
     })
 
     describe('Success', () => {
-      it('updates delegateeDelegators', () => {
-        // TODO
+      it('updates delegateeDelegators', async () => {
+        expect(await delegatedDAO.delegateeDelegators(investorDelegate1.address, 1)).to.equal(investor1.address)
+
+        expect(await delegatedDAO.delegateeDelegators(investorDelegate1.address, 2)).to.equal(investor2.address)
+
+        expect(await delegatedDAO.delegateeDelegators(investorDelegate1.address, 3)).to.equal(investor3.address)
+
+        expect(await delegatedDAO.delegateeDelegators(investorDelegate2.address, 1)).to.equal(investor4.address)
+
+        expect(await delegatedDAO.delegateeDelegators(investorDelegate2.address, 2)).to.equal(investor5.address)
+
+        expect(await delegatedDAO.delegateeDelegators(investorDelegate3.address, 1)).to.equal(investor6.address)
       })
 
-      it('updates delegateeDelegatorIndex', () => {
-        // TODO
+      it('updates delegateeDelegatorIndex', async () => {
+        expect(await delegatedDAO.delegateeDelegatorIndex(investorDelegate1.address, investor1.address)).to.equal(1)
+
+        expect(await delegatedDAO.delegateeDelegatorIndex(investorDelegate1.address, investor2.address)).to.equal(2)
+
+        expect(await delegatedDAO.delegateeDelegatorIndex(investorDelegate1.address, investor3.address)).to.equal(3)
+
+        expect(await delegatedDAO.delegateeDelegatorIndex(investorDelegate2.address, investor4.address)).to.equal(1)
+
+        expect(await delegatedDAO.delegateeDelegatorIndex(investorDelegate2.address, investor5.address)).to.equal(2)
+
+        expect(await delegatedDAO.delegateeDelegatorIndex(investorDelegate3.address, investor6.address)).to.equal(1)
       })
 
-      it('updates delegateeDelegatorCount', () => {
-        // TODO
+      it('updates delegateeDelegatorCount', async () => {
+        expect(await delegatedDAO.delegateeDelegatorCount(investorDelegate1.address)).to.equal(3)
+
+        expect(await delegatedDAO.delegateeDelegatorCount(investorDelegate2.address)).to.equal(2)
+
+        expect(await delegatedDAO.delegateeDelegatorCount(investorDelegate3.address)).to.equal(1)
       })
 
-      it('updates delegateeVotesReceived', () => {
-        // TODO
+      it('updates delegateeVotesReceived', async () => {
+        expect(await delegatedDAO.delegateeVotesReceived(investorDelegate1.address)).to.equal(300000)
+
+        expect(await delegatedDAO.delegateeVotesReceived(investorDelegate2.address)).to.equal(200000)
+
+        expect(await delegatedDAO.delegateeVotesReceived(investorDelegate3.address)).to.equal(100000)
       })
 
-      it('updates deelgatee votes on live proposals', () => {
-        // TODO
+      it('updates deelgatee votes on live proposals', async () => {
+        transaction = await delegatedDAO
+          .connect(investor1)
+          .createProposal('Proposal 1', 'Description 1', 10000, recipient.address)
+        await transaction.wait()
+
+        // expect no votes on proposal
+        let proposal = await delegatedDAO.proposals(1)
+        expect(proposal.votes).to.equal(0)
+
+        // investorDelegate3 votes on proposal
+        transaction = await delegatedDAO.connect(investorDelegate3).upVote(1)
+        await transaction.wait()
+
+        // expect investorDelegate3 votes to be counted w/ delegation
+        proposal = await delegatedDAO.proposals(1)
+        expect(proposal.votes).to.equal(200000)
+
+        // investor1 undelegates and delegates to investorDelegate3
+        await delegatedDAO.connect(investor1).undelegate()
+        transaction = await delegatedDAO.connect(investor1).delegate(investorDelegate3.address)
+
+        // expect investorDelegate3 votes to be counted w/ double delegation
+        proposal = await delegatedDAO.proposals(1)
+        expect(proposal.votes).to.equal(300000)
       })
 
-      it('emits a delegate event', () => {
-        // TODO
+      it('emits a delegate event', async () => {
+        await expect(transaction).to.emit(delegatedDAO, 'Delegate').withArgs(investor6.address, investorDelegate3.address)
       })
     })
 
     describe('Failure', () => {
-      it('rejects non-investor', () => {
-        // TODO
+      it('rejects non-investor', async () => {
+        await expect(delegatedDAO.connect(user).delegate(investorDelegate1.address)).to.be.reverted
       })
 
-      it('rejects delegating to self', () => {
-        // TODO
+      it('rejects delegating to self', async () => {
+        await expect(delegatedDAO.connect(investorDelegate4).delegate(investorDelegate4.address)).to.be.reverted
       })
 
-      it('rejects delegating to 0x0 address', () => {
-        // TODO
+      it('rejects delegating to 0x0 address', async () => {
+        await expect(delegatedDAO.connect(investorDelegate4).delegate(ethers.constants.AddressZero)).to.be.reverted
       })
 
-      it('rejects delegating to non-investor', () => {
-        // TODO
+      it('rejects delegating to non-investor', async () => {
+        await expect(delegatedDAO.connect(investorDelegate4).delegate(user.address)).to.be.reverted
       })
 
-      it('rejects delegating to delegator (chained delegation)', () => {
-        // TODO
+      it('rejects delegating to delegator (chained delegation)',async () => {
+        await expect(delegatedDAO.connect(investorDelegate4).delegate(investor1.address)).to.be.reverted
       })
 
-      it('rejects delegating as delegatee (chained delegation)', () => {
-        // TODO
+      it('rejects delegating as delegatee (chained delegation)', async () => {
+        await expect(delegatedDAO.connect(investorDelegate1).delegate(investorDelegate4.address)).to.be.reverted
+      })
+
+      it('rejects double delegation', async () => {
+        await expect(delegatedDAO.connect(investor1).delegate(investorDelegate2.address)).to.be.reverted
       })
     })
 
@@ -246,7 +300,7 @@ describe('Delegated DAO', () => {
       })
 
       it('updates delegateeDelegators', async () => {
-        expect(await delegatedDAO.delegateeDelegators(investorDelegate1.address, 1)).to.equal('0x0000000000000000000000000000000000000000')
+        expect(await delegatedDAO.delegateeDelegators(investorDelegate1.address, 1)).to.equal(ethers.constants.AddressZero)
       })
 
       it('removes delegator from delegateeDelegatorIndex mapping', async () => {
@@ -258,7 +312,7 @@ describe('Delegated DAO', () => {
       })
 
       it('updates delegatorDelegatee', async () => {
-        expect(await delegatedDAO.delegatorDelegatee(investor1.address)).to.equal('0x0000000000000000000000000000000000000000')
+        expect(await delegatedDAO.delegatorDelegatee(investor1.address)).to.equal(ethers.constants.AddressZero)
       })
 
       it('emits an undelegate event', async () => {
@@ -279,7 +333,7 @@ describe('Delegated DAO', () => {
         await transaction.wait()
 
         // check that investor2 updates delegatorDelegatee to 0x0 address
-        expect(await delegatedDAO.delegatorDelegatee(investor2.address)).to.equal('0x0000000000000000000000000000000000000000')
+        expect(await delegatedDAO.delegatorDelegatee(investor2.address)).to.equal(ethers.constants.AddressZero)
 
         // check that investorDelegate2 still has investor3 as delegator
         expect(await delegatedDAO.delegateeDelegators(investorDelegate2.address, 1)).to.equal(investor3.address)
