@@ -133,81 +133,198 @@ describe('Delegated DAO', () => {
     beforeEach(async () => {
       // 3 investors delegate to investorDelegate1
       transaction = await delegatedDAO.connect(investor1).delegate(investorDelegate1.address)
-      result = transaction.wait()
+      await transaction.wait()
 
       transaction = await delegatedDAO.connect(investor2).delegate(investorDelegate1.address)
-      result = transaction.wait()
+      await transaction.wait()
 
       transaction = await delegatedDAO.connect(investor3).delegate(investorDelegate1.address)
-      result = transaction.wait()
+      await transaction.wait()
 
-      // 1 investor delegates to investorDelegate2
+      // 2 investor delegates to investorDelegate2
       transaction = await delegatedDAO.connect(investor4).delegate(investorDelegate2.address)
-      result = transaction.wait()
+      await transaction.wait()
 
-      // 2 investors delegate to investorDelegate3
-      transaction = await delegatedDAO.connect(investor5).delegate(investorDelegate3.address)
-      result = transaction.wait()
+      transaction = await delegatedDAO.connect(investor5).delegate(investorDelegate2.address)
+      await transaction.wait()
 
+      // 1 investors delegate to investorDelegate3
       transaction = await delegatedDAO.connect(investor6).delegate(investorDelegate3.address)
-      result = transaction.wait()
+      await transaction.wait()
 
       // 0 investors delgate to investorDelegate4
       // no transaction needed
     })
 
     describe('Success', () => {
-      it('delegates correctly', () => {
-
+      it('updates delegateeDelegators', () => {
+        // TODO
       })
 
-      // it updates delegateeDelegators
-      // it updates delegateeDelegatorIndex
-      // it updates delegateeDelegatorCount
-      // it updates delegateeDelegatorCount
-      // it updates delegateeVotesReceived
-      // it updates deelgatee's votes on live proposals
-      // it emits a delegate event
+      it('updates delegateeDelegatorIndex', () => {
+        // TODO
+      })
+
+      it('updates delegateeDelegatorCount', () => {
+        // TODO
+      })
+
+      it('updates delegateeVotesReceived', () => {
+        // TODO
+      })
+
+      it('updates deelgatee votes on live proposals', () => {
+        // TODO
+      })
+
+      it('emits a delegate event', () => {
+        // TODO
+      })
     })
 
     describe('Failure', () => {
-      it('fails correctly', () => {
-
+      it('rejects non-investor', () => {
+        // TODO
       })
 
-      // it rejects non-investor
-      // it rejects delegating to self
-      // it rejects delegating to 0x0 address
-      // it rejects delegating to non-investor
-      // it rejects delegating as a delegatee (chained delegation)
+      it('rejects delegating to self', () => {
+        // TODO
+      })
+
+      it('rejects delegating to 0x0 address', () => {
+        // TODO
+      })
+
+      it('rejects delegating to non-investor', () => {
+        // TODO
+      })
+
+      it('rejects delegating to delegator (chained delegation)', () => {
+        // TODO
+      })
+
+      it('rejects delegating as delegatee (chained delegation)', () => {
+        // TODO
+      })
     })
+
   })
 
   describe('Undelegate Voting', () => {
     let transaction, result
 
-    describe('Success', () => {
-      it('undelegates correctly', () => {
+    beforeEach(async () => {
+      // investor1 delegates to investorDelegate1
+      transaction = await delegatedDAO.connect(investor1).delegate(investorDelegate1.address)
+      await transaction.wait()
 
+      // investor1 creates proposal
+      transaction = await delegatedDAO
+        .connect(investor1)
+        .createProposal('Proposal 1', 'Description 1', 10000, recipient.address)
+      await transaction.wait()
+
+      // investorDelegate1 votes on proposal
+      transaction = await delegatedDAO
+        .connect(investorDelegate1)
+        .upVote(1)
+      await transaction.wait()
+
+      // investor1 undelegates
+      transaction = await delegatedDAO.connect(investor1).undelegate()
+      await transaction.wait()
+    })
+
+    describe('Success', () => {
+      it('removes delegator votes from delegateeVotesReceived', async () => {
+        expect(await delegatedDAO.delegateeVotesReceived(investorDelegate1.address)).to.equal(0)
       })
 
-      // it rejects non-investor
-      // it removes delegator's votes from delegateeVotesReceived
-      // it removes delegator's votes from live proposals
-      // it updates delegateeDelegators
-      // it updates delegateeDelegatorIndex
-      // it updates delegateeDelegatorCount
-      // it updates delegatorDelegatee
-      // it emits an undelegate event
+      it('removes delegator votes from live proposals voted on by removed delegatee', async () => {
+        const proposal = await delegatedDAO.proposals(1)
+        expect(proposal.votes).to.equal(100000)
+      })
+
+      it('updates delegateeDelegators', async () => {
+        expect(await delegatedDAO.delegateeDelegators(investorDelegate1.address, 1)).to.equal('0x0000000000000000000000000000000000000000')
+      })
+
+      it('removes delegator from delegateeDelegatorIndex mapping', async () => {
+        expect(await delegatedDAO.delegateeDelegatorIndex(investorDelegate1.address, investor1.address)).to.equal(0)
+      })
+
+      it('updates delegateeDelegatorCount', async () => {
+        expect(await delegatedDAO.delegateeDelegatorCount(investorDelegate1.address)).to.equal(0)
+      })
+
+      it('updates delegatorDelegatee', async () => {
+        expect(await delegatedDAO.delegatorDelegatee(investor1.address)).to.equal('0x0000000000000000000000000000000000000000')
+      })
+
+      it('emits an undelegate event', async () => {
+        await expect(transaction).to.emit(delegatedDAO, 'Undelegate').withArgs(investor1.address, investorDelegate1.address)
+      })
+
+      it('handles multiple delegators', async () => {
+        // delegate investor2 to investorDelegate2
+        transaction = await delegatedDAO.connect(investor2).delegate(investorDelegate2.address)
+        await transaction.wait()
+
+        // delegate investor3 to investorDelegate2
+        transaction = await delegatedDAO.connect(investor3).delegate(investorDelegate2.address)
+        await transaction.wait()
+
+        // undelegate investor2 from investorDelegate2
+        transaction = await delegatedDAO.connect(investor2).undelegate()
+        await transaction.wait()
+
+        // check that investor2 updates delegatorDelegatee to 0x0 address
+        expect(await delegatedDAO.delegatorDelegatee(investor2.address)).to.equal('0x0000000000000000000000000000000000000000')
+
+        // check that investorDelegate2 still has investor3 as delegator
+        expect(await delegatedDAO.delegateeDelegators(investorDelegate2.address, 1)).to.equal(investor3.address)
+
+        // check investorDelegate2 has correct delegator count
+        expect(await delegatedDAO.delegateeDelegatorCount(investorDelegate2.address)).to.equal(1)
+
+        // check investor3 has correct delegator index
+        expect(await delegatedDAO.delegateeDelegatorIndex(investorDelegate2.address, investor3.address)).to.equal(1)
+
+        // check that investorDelegate2 has correct voting power
+        expect(await delegatedDAO.delegateeVotesReceived(investorDelegate2.address)).to.equal(100000)
+      })
+
+      it('should allow the delegator to vote independently after undelegation', async () => {
+        await delegatedDAO.connect(investor1).upVote(1)
+        const proposal = await delegatedDAO.proposals(1)
+        expect(proposal.votes).to.equal(200000) // 100000 votes from investorDelegatee1 (in beforeEach) and 100000 from undelegated investor1
+      })
+
+      it('should allow the delegator to delegate to a new delegatee after undelegation', async () => {
+        await delegatedDAO.connect(investor1).delegate(investorDelegate2.address)
+        const newDelegateeVotes = await delegatedDAO.delegateeVotesReceived(investorDelegate2.address)
+        expect(newDelegateeVotes).to.equal(100000) // The votes from investor1 should be added to investorDelegate2
+      })
+
     })
 
     describe('Failure', () => {
-      it('fails correctly', () => {
-
+      it('rejects non-investor', async () => {
+        await expect(delegatedDAO.connect(user).undelegate()).to.be.reverted
       })
 
-      // it rejects investors who have not delegated
+      it('rejects investors who have not delegated', async () => {
+        await expect(delegatedDAO.connect(investorDelegate4).undelegate()).to.be.reverted
+      })
+
+      it('rejects investors who have already undelegated', async () => {
+        await delegatedDAO.connect(investor2).delegate(investorDelegate2.address);
+        await delegatedDAO.connect(investor2).undelegate();
+        await expect(delegatedDAO.connect(investor2).undelegate()).to.be.reverted;
+      })
+
     })
+
   })
 
   describe('Up Voting', () => {
@@ -235,7 +352,9 @@ describe('Delegated DAO', () => {
         expect(await delegatedDAO.votesCast(investor1.address, 1)).to.equal(100000)
       })
 
-      // it records the votes cast by the voter and all voters who delegated
+      it('records the votes cast by the voter and all voters who delegated', () => {
+        // TODO
+      })
 
       it('emits an UpVote event', async () => {
         await expect(transaction).to.emit(delegatedDAO, 'UpVote').withArgs(1, investor1.address)
@@ -254,8 +373,22 @@ describe('Delegated DAO', () => {
         await expect(delegatedDAO.connect(investor1).upVote(1)).to.be.reverted
       })
 
-      // it rejects if investor has delegated vote
+      it('rejects voting if investor has delegated votes', async () => {
+        // investor1 delegates to investorDelegate1
+        transaction = await delegatedDAO.connect(investor1).delegate(investorDelegate1.address)
+        await transaction.wait()
+
+        // investor1 creates proposal
+        transaction = await delegatedDAO
+          .connect(investor1)
+          .createProposal('Proposal 1', 'Description 1', 10000, recipient.address)
+        await transaction.wait()
+
+        // investorDelegate1 votes on proposal
+        await expect(delegatedDAO.connect(investor1).upVote(1)).to.be.reverted
+      })
     })
+
   })
 
   describe('Down Voting', () => {
@@ -287,7 +420,9 @@ describe('Delegated DAO', () => {
         expect(await delegatedDAO.votesCast(investor2.address, 1)).to.equal(100000)
       })
 
-      // it records the votes cast by the voter and all voters who delegated
+      it('records the votes cast by the voter and all voters who delegated', () => {
+        // TODO
+      })
 
       it('emits a DownVote event', async () => {
         await expect(transaction).to.emit(delegatedDAO, 'DownVote').withArgs(1, investor2.address)
@@ -305,7 +440,23 @@ describe('Delegated DAO', () => {
 
         await expect(delegatedDAO.connect(investor1).downVote(1)).to.be.reverted
       })
+
+      it('rejects voting if investor delegated votes', async () => {
+        // investor1 delegates to investorDelegate1
+        transaction = await delegatedDAO.connect(investor1).delegate(investorDelegate1.address)
+        await transaction.wait()
+
+        // investor1 creates proposal
+        transaction = await delegatedDAO
+          .connect(investor1)
+          .createProposal('Proposal 1', 'Description 1', 10000, recipient.address)
+        await transaction.wait()
+
+        // investorDelegate1 votes on proposal
+        await expect(delegatedDAO.connect(investor1).upVote(1)).to.be.reverted
+      })
     })
+
   })
 
   describe('Governance', () => {
@@ -395,7 +546,7 @@ describe('Delegated DAO', () => {
         await expect(delegatedDAO.connect(user).finalizeProposal(1)).to.be.reverted
       })
 
-      it('rejects proposal if already finalzied', async () => {
+      it('rejects finalization if already finalized', async () => {
         // Increase votes to pass quorum
         transaction = await delegatedDAO.connect(investor4).upVote(1)
         result = await transaction.wait()

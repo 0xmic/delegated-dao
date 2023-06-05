@@ -120,18 +120,21 @@ contract DelegatedDAO {
         require(_delegatee != msg.sender, "Cannot delegate to self");
         require(_delegatee != address(0), "Cannot delegate to 0x0 address");
         require(token.balanceOf(_delegatee) > 0, "Cannot delegate to non-investor");
-        require(delegatorDelegatee[msg.sender] == address(0), "Cannot delegate as delegatee (chained delegation)");
+        require(delegatorDelegatee[_delegatee] == address(0), "Cannot delegate to delegator (chained delegation)");
+        require(delegateeDelegatorCount[msg.sender] == 0, "Cannot delegate votes as delegatee (chained delegation)");
 
         if(delegatorDelegatee[msg.sender] != address(0)) {
             undelegate();
         }
 
         // Delegate votes
+        delegateeDelegatorCount[_delegatee]++;
         delegateeDelegators[_delegatee][delegateeDelegatorCount[_delegatee]] = msg.sender;
         delegateeDelegatorIndex[_delegatee][msg.sender] = delegateeDelegatorCount[_delegatee];
-        delegateeDelegatorCount[_delegatee]++;
-
         delegateeVotesReceived[_delegatee] += token.balanceOf(msg.sender);
+
+        // Set delegatorDelegatee to delegatee
+        delegatorDelegatee[msg.sender] = _delegatee;
 
         // Update delegatee's votes on live proposals
         for(uint256 i = 1; i <= proposalCount; i++) {
@@ -147,7 +150,7 @@ contract DelegatedDAO {
     /* @notice Undelegate a vote
      */
     function undelegate() public onlyInvestor {
-        require(delegatorDelegatee[msg.sender] != address(0), "Not delegated");
+        require(delegatorDelegatee[msg.sender] != address(0), "Have not delegated votes");
 
         address removedDelegatee = delegatorDelegatee[msg.sender];
 
@@ -160,22 +163,35 @@ contract DelegatedDAO {
             // Check if the proposal is live, and the delegator has voted
             if(proposals[i].finalized == false && votesCast[msg.sender][i] > 0) {
                 votesCast[removedDelegatee][i] -= voterBalance;
+                votesCast[msg.sender][i] -= voterBalance;
                 proposals[i].votes -= int(voterBalance);
             }
         }
 
         // Remove delegator from delegateeDelegators
         uint256 indexToRemove = delegateeDelegatorIndex[removedDelegatee][msg.sender];
-        address lastDelegator = delegateeDelegators[removedDelegatee][delegateeDelegatorCount[removedDelegatee] - 1];
-        delegateeDelegators[removedDelegatee][indexToRemove] = lastDelegator;
-        delegateeDelegatorIndex[removedDelegatee][lastDelegator] = indexToRemove;
+        if (indexToRemove != delegateeDelegatorCount[removedDelegatee]) {
+            // Remove delegator from delegateeDelegators
+            address lastDelegator = delegateeDelegators[removedDelegatee][delegateeDelegatorCount[removedDelegatee]];
+            delegateeDelegators[removedDelegatee][indexToRemove] = lastDelegator;
+            delegateeDelegatorIndex[removedDelegatee][lastDelegator] = indexToRemove;
+        }
+
+        // Reset the delegator index for the removed delegatee
+        delegateeDelegatorIndex[removedDelegatee][msg.sender] = 0;
+
+        // Reduce the delegator count for the delegatee
         delegateeDelegatorCount[removedDelegatee]--;
+
+        // Remove the last delegator from delegateeDelegators
+        delegateeDelegators[removedDelegatee][delegateeDelegatorCount[removedDelegatee]+1] = address(0);
 
         // Reset delegatorDelegatee to 0x0 address
         delete delegatorDelegatee[msg.sender];
 
         emit Undelegate(msg.sender, removedDelegatee);
     }
+
 
     /* @notice Upvote a proposal
      * @param _id The ID of the proposal
@@ -196,9 +212,9 @@ contract DelegatedDAO {
 
         proposal.votes += int(voteWeight);
 
-        // Record the votes cast by the voter and all the delegators who delegated to this voter
+        // Record votes cast by the voter and all delegators who delegated to this voter
         votesCast[msg.sender][_id] = voteWeight;
-        for(uint256 i = 0; i < delegateeDelegatorCount[msg.sender]; i++) {
+        for(uint256 i = 1; i <= delegateeDelegatorCount[msg.sender]; i++) {
             address delegator = delegateeDelegators[msg.sender][i];
             votesCast[delegator][_id] = token.balanceOf(delegator);
         }
@@ -225,9 +241,9 @@ contract DelegatedDAO {
 
         proposal.votes -= int(voteWeight);
 
-        // Record the votes cast by the voter and all the delegators who delegated to this voter
+        // Record votes cast by the voter and all delegators who delegated to this voter
         votesCast[msg.sender][_id] = voteWeight;
-        for(uint256 i = 0; i < delegateeDelegatorCount[msg.sender]; i++) {
+        for(uint256 i = 1; i <= delegateeDelegatorCount[msg.sender]; i++) {
             address delegator = delegateeDelegators[msg.sender][i];
             votesCast[delegator][_id] = token.balanceOf(delegator);
         }
@@ -242,7 +258,7 @@ contract DelegatedDAO {
         Proposal storage proposal = proposals[_id];
 
         require(!proposal.finalized, "Already finalized");
-        require(proposal.votes >= int(quorum), "Not enough votes");
+        require(proposal.votes >= int(quorum) && proposal.votes > 0, "Not enough votes");
         require(token.balanceOf(address(this)) >= proposal.amount, "Not enough funds");
 
         require(token.transfer(proposal.recipient, proposal.amount), "Transfer failed");
