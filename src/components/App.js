@@ -10,14 +10,10 @@ import Loading from './Loading';
 import {
   loadAccount,
   loadNetwork,
-  loadProvider
+  loadProvider,
+  loadToken,
+  loadDelegatedDAO
 } from '../store/interactions'
-
-// ABIs: Import your contract ABIs here
-// import TOKEN_ABI from '../abis/Token.json'
-
-// Config: Import your network config here
-// import config from '../config.json';
 
 function App() {
   const dispatch = useDispatch()
@@ -30,6 +26,12 @@ function App() {
 
     // Fetch accounts
     await loadAccount(dispatch)
+
+    // Fetch token contract
+    await loadToken(provider, chainId, dispatch)
+
+    // Fetch DAO contract
+    await loadDelegatedDAO(provider, chainId, dispatch)
   }
 
   useEffect(() => {
