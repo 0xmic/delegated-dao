@@ -29,7 +29,7 @@ contract DelegatedDAO {
     mapping(uint256 => Proposal) public proposals;
 
     /* @notice Investor address to proposal ID to vote weight cast on proposal */
-    mapping(address => mapping(uint256 => uint256)) public votesCast;
+    mapping(address => mapping(uint256 => int256)) public votesCast;
 
     /* @notice Delegator address to delegatee address */
     mapping(address => address) public delegatorDelegatee;
@@ -163,8 +163,8 @@ contract DelegatedDAO {
         for(uint256 i = 1; i <= proposalCount; i++) {
             // Check if the proposal is live, and the delegator has voted
             if(proposals[i].finalized == false && votesCast[msg.sender][i] > 0) {
-                votesCast[removedDelegatee][i] -= voterBalance;
-                votesCast[msg.sender][i] -= voterBalance;
+                votesCast[removedDelegatee][i] -= int(voterBalance);
+                votesCast[msg.sender][i] -= int(voterBalance);
                 proposals[i].votes -= int(voterBalance);
             }
         }
@@ -214,10 +214,10 @@ contract DelegatedDAO {
         proposal.votes += int(voteWeight);
 
         // Record votes cast by the voter and all delegators who delegated to this voter
-        votesCast[msg.sender][_id] = voteWeight;
+        votesCast[msg.sender][_id] = int(voteWeight);
         for(uint256 i = 1; i <= delegateeDelegatorCount[msg.sender]; i++) {
             address delegator = delegateeDelegators[msg.sender][i];
-            votesCast[delegator][_id] = token.balanceOf(delegator);
+            votesCast[delegator][_id] = int(token.balanceOf(delegator));
         }
 
         emit UpVote(_id, msg.sender);
@@ -243,10 +243,10 @@ contract DelegatedDAO {
         proposal.votes -= int(voteWeight);
 
         // Record votes cast by the voter and all delegators who delegated to this voter
-        votesCast[msg.sender][_id] = voteWeight;
+        votesCast[msg.sender][_id] -= int(voteWeight);
         for(uint256 i = 1; i <= delegateeDelegatorCount[msg.sender]; i++) {
             address delegator = delegateeDelegators[msg.sender][i];
-            votesCast[delegator][_id] = token.balanceOf(delegator);
+            votesCast[delegator][_id] -= int(token.balanceOf(delegator));
         }
 
         emit DownVote(_id, msg.sender);

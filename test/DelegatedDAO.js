@@ -359,7 +359,6 @@ describe('Delegated DAO', () => {
         const newDelegateeVotes = await delegatedDAO.delegateeVotesReceived(investorDelegate2.address)
         expect(newDelegateeVotes).to.equal(100000) // The votes from investor1 should be added to investorDelegate2
       })
-
     })
 
     describe('Failure', () => {
@@ -376,7 +375,6 @@ describe('Delegated DAO', () => {
         await delegatedDAO.connect(investor2).undelegate();
         await expect(delegatedDAO.connect(investor2).undelegate()).to.be.reverted;
       })
-
     })
 
   })
@@ -406,8 +404,21 @@ describe('Delegated DAO', () => {
         expect(await delegatedDAO.votesCast(investor1.address, 1)).to.equal(100000)
       })
 
-      it('records the votes cast by the voter and all voters who delegated', () => {
-        // TODO
+      it('records the votes cast by the voter and all voters who delegated', async () => {
+        // 2 investor delegates to investorDelegate2
+        transaction = await delegatedDAO.connect(investor4).delegate(investorDelegate2.address)
+        await transaction.wait()
+
+        transaction = await delegatedDAO.connect(investor5).delegate(investorDelegate2.address)
+        await transaction.wait()
+
+        // investorDelegate2 upvotes proposal 1
+        transaction = await delegatedDAO.connect(investorDelegate2).upVote(1)
+
+        // updates votesCast for investor4, investor5, and investorDelegate2
+        expect(await delegatedDAO.votesCast(investor4.address, 1)).to.equal(100000)
+        expect(await delegatedDAO.votesCast(investor5.address, 1)).to.equal(100000)
+        expect(await delegatedDAO.votesCast(investorDelegate2.address, 1)).to.equal(300000)
       })
 
       it('emits an UpVote event', async () => {
@@ -471,11 +482,23 @@ describe('Delegated DAO', () => {
 
       it('updates voter mapping', async () => {
         expect(await delegatedDAO.votesCast(investor1.address, 1)).to.equal(100000)
-        expect(await delegatedDAO.votesCast(investor2.address, 1)).to.equal(100000)
+        expect(await delegatedDAO.votesCast(investor2.address, 1)).to.equal(-100000)
       })
 
-      it('records the votes cast by the voter and all voters who delegated', () => {
-        // TODO
+      it('records the votes cast by the voter and all voters who delegated', async () => {
+        // investor4 and investor5 delegate to investorDelegate2
+        transaction = await delegatedDAO.connect(investor4).delegate(investorDelegate2.address)
+        await transaction.wait()
+
+        transaction = await delegatedDAO.connect(investor5).delegate(investorDelegate2.address)
+        await transaction.wait()
+
+        // investorDelegate2 downvotes proposal 1
+        transaction = await delegatedDAO.connect(investorDelegate2).downVote(1)
+
+        expect(await delegatedDAO.votesCast(investor4.address, 1)).to.equal(-100000)
+        expect(await delegatedDAO.votesCast(investor5.address, 1)).to.equal(-100000)
+        expect(await delegatedDAO.votesCast(investorDelegate2.address, 1)).to.equal(-300000)
       })
 
       it('emits a DownVote event', async () => {
