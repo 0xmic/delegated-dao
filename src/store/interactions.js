@@ -65,5 +65,5 @@ export const loadDelegatedDAO = async (provider, chainId, dispatch) => {
 export const loadBalance = async (token, account, dispatch) => {
   const balance = await token.balanceOf(account)
 
-  dispatch(balanceLoaded(balance))
+  dispatch(balanceLoaded(ethers.utils.formatUnits(balance.toString(), 'ether')))
 }
