@@ -1,11 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 import { Container } from 'react-bootstrap'
 import { ethers } from 'ethers'
 
 // Components
 import Navigation from './Navigation';
-import Loading from './Loading';
+import Tabs from './Tabs';
+import Propose from './Propose';
+import Delegate from './Delegate';
+import Vote from './Vote';
+import Finalized from './Finalized';
 
 import {
   loadAccount,
@@ -48,14 +53,23 @@ function App() {
 
   return(
     <Container>
-      <Navigation />
+      <HashRouter>
+        <Navigation />
 
-      <h1 className='my-4 text-center'>Crypto Token (CT) DAO Dashboard</h1>
+        <hr />
 
-      <>
-        <p className='text-center'><strong>Your ETH Balance:</strong> 0 ETH</p>
-        <p className='text-center'>Edit App.js to add your code here.</p>
-      </>
+        <Tabs />
+
+        <Routes>
+          <Route exact path="/" element={<Propose />} />
+          <Route exact path="/delegate" element={<Delegate />} />
+          <Route exact path="/vote" element={<Vote />} />
+          <Route exact path="/finalized" element={<Finalized />} />
+
+        </Routes>
+
+      </HashRouter>
+
     </Container>
   )
 }
