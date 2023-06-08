@@ -2,19 +2,28 @@ import { useState } from 'react'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import Spinner from 'react-bootstrap/Spinner'
-import { set } from 'lodash'
+
+import { ethers } from 'ethers'
 
 const Propose = () => {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState(0)
   const [recipient, setRecipient] = useState('')
+  const [error, setError] = useState('')
 
   const [isWaiting, setIsWaiting] = useState(false)
 
   const createHandler = async (e) => {
     e.preventDefault()
+
+    if (!ethers.utils.isAddress(recipient)) {
+      setError('Invalid Ethereum address')
+      return
+    }
+
     setIsWaiting(true)
+    setError('') // reset error message when the address is valid
   }
 
   return (
@@ -56,11 +65,13 @@ const Propose = () => {
           type='text'
           placeholder='Enter recipient address'
           className='my-2'
+          isInvalid={!!error}
           onChange={(e) => {
             setRecipient(e.target.value)
             console.log(`Set Address handler: ${recipient}`)
           }}
         />
+        <Form.Control.Feedback type='invalid'>{error}</Form.Control.Feedback>
         {isWaiting ? (
           <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} />
         ) : (
