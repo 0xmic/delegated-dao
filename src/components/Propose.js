@@ -53,11 +53,11 @@ const Propose = () => {
           className='my-2'
           min={0}
           onChange={(e) => {
-            const value = e.target.value;
-            if (value < 0) {
-                e.target.value = 0;
+            let value = parseInt(e.target.value, 10);
+            if (isNaN(value) || value < 0) {
+                value = 0;
             }
-            setAmount(e.target.value)
+            setAmount(value);
             console.log(`Set Number handler: ${amount}`);
           }}
         />
