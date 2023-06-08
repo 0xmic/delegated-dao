@@ -23,28 +23,35 @@ const Delegate = () => {
   }
 
   return (
-    <Form onSubmit={delegateHandler}>
-      <Form.Group style={{ maxWidth: '450px', margin: '50px auto' }}>
-        <Form.Control
-          type='text'
-          placeholder='Enter delegate address'
-          className='my-2'
-          isInvalid={!!error}
-          onChange={(e) => {
-            setDelegate(e.target.value)
-            console.log(`Set Delegate handler: ${delegate}`)
-          }}
-        />
-        <Form.Control.Feedback type='invalid'>{error}</Form.Control.Feedback>
-        {isWaiting ? (
-          <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} />
-        ) : (
-          <Button variant='primary' type='submit' style={{ width: '100%' }}>
-            Delegate Votes
-          </Button>
-        )}
-      </Form.Group>
-    </Form>
+    <>
+      <Form onSubmit={delegateHandler}>
+        <Form.Group style={{ maxWidth: '450px', margin: '50px auto' }}>
+          <Form.Control
+            type='text'
+            placeholder='Enter delegate address'
+            className='my-2'
+            isInvalid={!!error}
+            onChange={(e) => {
+              setDelegate(e.target.value)
+              console.log(`Set Delegate handler: ${delegate}`)
+            }}
+          />
+          <Form.Control.Feedback type='invalid'>{error}</Form.Control.Feedback>
+          {isWaiting ? (
+            <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} />
+          ) : (
+            <Button variant='primary' type='submit' style={{ width: '100%' }}>
+              Delegate Votes
+            </Button>
+          )}
+        </Form.Group>
+      </Form>
+
+      <hr />
+
+      <h2 className='my-4 text-center'>Current Delegates</h2>
+
+    </>
   )
 }
 
