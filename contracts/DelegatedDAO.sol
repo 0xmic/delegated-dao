@@ -54,8 +54,8 @@ contract DelegatedDAO {
         string description
     );
 
-    event Delegate(address indexed from, address indexed to);
-    event Undelegate(address indexed from, address indexed to);
+    event Delegate(address indexed delegator, address indexed delegatee, uint256 amount, uint256 timestamp);
+    event Undelegate(address indexed delegator, address indexed delegatee, uint256 amount, uint256 timestamp);
 
     event UpVote(uint256 id, address investor);
     event DownVote(uint256 id, address investor);
@@ -128,6 +128,8 @@ contract DelegatedDAO {
             undelegate();
         }
 
+        uint256 amount = token.balanceOf(msg.sender);
+
         // Delegate votes
         delegateeDelegatorCount[_delegatee]++;
         delegateeDelegators[_delegatee][delegateeDelegatorCount[_delegatee]] = msg.sender;
@@ -145,7 +147,7 @@ contract DelegatedDAO {
             }
         }
 
-        emit Delegate(msg.sender, _delegatee);
+        emit Delegate(msg.sender, _delegatee, amount, block.timestamp);
     }
 
     /* @notice Undelegate a vote
@@ -156,16 +158,16 @@ contract DelegatedDAO {
         address removedDelegatee = delegatorDelegatee[msg.sender];
 
         // Remove delegator's votes from delegateeVotesReceived
-        uint256 voterBalance = token.balanceOf(msg.sender);
-        delegateeVotesReceived[removedDelegatee] -= voterBalance;
+        uint256 amount = token.balanceOf(msg.sender);
+        delegateeVotesReceived[removedDelegatee] -= amount;
 
         // Remove delegator's votes from live proposals
         for(uint256 i = 1; i <= proposalCount; i++) {
             // Check if the proposal is live, and the delegator has voted
             if(proposals[i].finalized == false && votesCast[msg.sender][i] > 0) {
-                votesCast[removedDelegatee][i] -= int(voterBalance);
-                votesCast[msg.sender][i] -= int(voterBalance);
-                proposals[i].votes -= int(voterBalance);
+                votesCast[removedDelegatee][i] -= int(amount);
+                votesCast[msg.sender][i] -= int(amount);
+                proposals[i].votes -= int(amount);
             }
         }
 
@@ -190,7 +192,8 @@ contract DelegatedDAO {
         // Reset delegatorDelegatee to 0x0 address
         delete delegatorDelegatee[msg.sender];
 
-        emit Undelegate(msg.sender, removedDelegatee);
+        emit Undelegate(msg.sender, removedDelegatee, amount, block.timestamp);
+
     }
 
 

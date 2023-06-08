@@ -150,7 +150,7 @@ describe('Delegated DAO', () => {
 
       // 1 investors delegate to investorDelegate3
       transaction = await delegatedDAO.connect(investor6).delegate(investorDelegate3.address)
-      await transaction.wait()
+      result = await transaction.wait()
 
       // 0 investors delgate to investorDelegate4 - no transaction needed
     })
@@ -228,7 +228,23 @@ describe('Delegated DAO', () => {
       })
 
       it('emits a delegate event', async () => {
-        await expect(transaction).to.emit(delegatedDAO, 'Delegate').withArgs(investor6.address, investorDelegate3.address)
+        // fetch block of transaction
+        let block = await ethers.provider.getBlock(result.blockNumber)
+
+        // test the block's timestamp
+        expect(block.timestamp).to.be.at.least(Date.now()/1000 - 60) // allow 60 seconds for potential clock skew
+
+        // extract event from the receipt
+        let event = result.events?.filter((x) => {return x.event == 'Delegate'})[0]
+
+        // test the event
+        /* eslint-disable no-unused-expressions */
+        expect(event).to.not.be.undefined
+        expect(event.args).to.not.be.undefined
+        expect(event.args.delegatee).to.equal(investorDelegate3.address)
+        expect(event.args.delegator).to.equal(investor6.address)
+        expect(event.args.amount.toNumber()).to.equal(100000) // adjust to your expected amount
+        expect(event.args.timestamp.toNumber()).to.equal(block.timestamp)
       })
     })
 
@@ -286,7 +302,7 @@ describe('Delegated DAO', () => {
 
       // investor1 undelegates
       transaction = await delegatedDAO.connect(investor1).undelegate()
-      await transaction.wait()
+      result = await transaction.wait()
     })
 
     describe('Success', () => {
@@ -316,7 +332,23 @@ describe('Delegated DAO', () => {
       })
 
       it('emits an undelegate event', async () => {
-        await expect(transaction).to.emit(delegatedDAO, 'Undelegate').withArgs(investor1.address, investorDelegate1.address)
+        // fetch block of transaction
+        let block = await ethers.provider.getBlock(result.blockNumber)
+
+        // test the block's timestamp
+        expect(block.timestamp).to.be.at.least(Date.now()/1000 - 60) // allow 60 seconds for potential clock skew
+
+        // extract event from the receipt
+        let event = result.events?.filter((x) => {return x.event == 'Undelegate'})[0]
+
+        // test the event
+        /* eslint-disable no-unused-expressions */
+        expect(event).to.not.be.undefined
+        expect(event.args).to.not.be.undefined
+        expect(event.args.delegatee).to.equal(investorDelegate1.address)
+        expect(event.args.delegator).to.equal(investor1.address)
+        expect(event.args.amount.toNumber()).to.equal(100000) // adjust to your expected amount
+        expect(event.args.timestamp.toNumber()).to.equal(block.timestamp)
       })
 
       it('handles multiple delegators', async () => {
