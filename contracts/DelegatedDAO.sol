@@ -34,6 +34,9 @@ contract DelegatedDAO {
     /* @notice Delegator address to delegatee address */
     mapping(address => address) public delegatorDelegatee;
 
+    /* @notice Delegator address to delegator balance */
+    mapping(address => uint256) public delegatorBalance;
+
     /* @notice Delegatee address to delegator index to delegator address */
     mapping(address => mapping(uint256 => address)) public delegateeDelegators;
 
@@ -74,7 +77,10 @@ contract DelegatedDAO {
 
     /* @notice Modifier to ensure the function caller is a token holder */
     modifier onlyInvestor() {
-        require(token.balanceOf(msg.sender) > 0, "Must be token holder");
+        require(
+            token.balanceOf(msg.sender) > 0 ||
+            delegatorBalance[msg.sender] > 0,
+            "Must be token holder");
         _;
     }
 
@@ -128,13 +134,16 @@ contract DelegatedDAO {
             undelegate();
         }
 
+        // Transfer tokens from the delegator to the DAO contract
         uint256 amount = token.balanceOf(msg.sender);
+        require(token.transferFrom(msg.sender, address(this), amount), "Transfer failed");
+        delegatorBalance[msg.sender] = amount;
 
         // Delegate votes
         delegateeDelegatorCount[_delegatee]++;
         delegateeDelegators[_delegatee][delegateeDelegatorCount[_delegatee]] = msg.sender;
         delegateeDelegatorIndex[_delegatee][msg.sender] = delegateeDelegatorCount[_delegatee];
-        delegateeVotesReceived[_delegatee] += token.balanceOf(msg.sender);
+        delegateeVotesReceived[_delegatee] += amount;
 
         // Set delegatorDelegatee to delegatee
         delegatorDelegatee[msg.sender] = _delegatee;
@@ -143,7 +152,7 @@ contract DelegatedDAO {
         for(uint256 i = 1; i <= proposalCount; i++) {
             // Check if the proposal is live, the delegatee has voted, and the delegator has not
             if(proposals[i].finalized == false && votesCast[_delegatee][i] > 0 && votesCast[msg.sender][i] == 0) {
-                proposals[i].votes += int(token.balanceOf(msg.sender));
+                proposals[i].votes += int(amount);
             }
         }
 
@@ -155,10 +164,13 @@ contract DelegatedDAO {
     function undelegate() public onlyInvestor {
         require(delegatorDelegatee[msg.sender] != address(0), "Have not delegated votes");
 
-        address removedDelegatee = delegatorDelegatee[msg.sender];
+        // Transfer tokens from the DAO contract back to the delegator
+        uint256 amount = delegatorBalance[msg.sender];
+        require(token.transfer(msg.sender, amount), "Transfer failed");
+        delegatorBalance[msg.sender] = 0;
 
         // Remove delegator's votes from delegateeVotesReceived
-        uint256 amount = token.balanceOf(msg.sender);
+        address removedDelegatee = delegatorDelegatee[msg.sender];
         delegateeVotesReceived[removedDelegatee] -= amount;
 
         // Remove delegator's votes from live proposals
@@ -193,7 +205,6 @@ contract DelegatedDAO {
         delete delegatorDelegatee[msg.sender];
 
         emit Undelegate(msg.sender, removedDelegatee, amount, block.timestamp);
-
     }
 
 
@@ -220,7 +231,7 @@ contract DelegatedDAO {
         votesCast[msg.sender][_id] = int(voteWeight);
         for(uint256 i = 1; i <= delegateeDelegatorCount[msg.sender]; i++) {
             address delegator = delegateeDelegators[msg.sender][i];
-            votesCast[delegator][_id] = int(token.balanceOf(delegator));
+            votesCast[delegator][_id] = int(delegatorBalance[delegator]);
         }
 
         emit UpVote(_id, msg.sender);
@@ -249,7 +260,7 @@ contract DelegatedDAO {
         votesCast[msg.sender][_id] -= int(voteWeight);
         for(uint256 i = 1; i <= delegateeDelegatorCount[msg.sender]; i++) {
             address delegator = delegateeDelegators[msg.sender][i];
-            votesCast[delegator][_id] -= int(token.balanceOf(delegator));
+            votesCast[delegator][_id] -= int(delegatorBalance[delegator]);
         }
 
         emit DownVote(_id, msg.sender);
