@@ -27,25 +27,35 @@ const Finalized = () => {
   ]
 
   return (
-    <Table striped bordered hover responsive>
-      <thead>
-        <tr>
-          {headers.map((header, index) => (
-            <th key={index} className='text-center'>{header}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {/* TODO: Replace with actual proposal data once Redux is set up */}
-        {proposals.map((proposal, index) => (
-          <tr key={index}>
-            {/* TODO: Insert logic to render each cell */}
-            <td className='text-center'>{proposal.id}</td>
-            {/* TODO: Input rest of table cells */}
+    <>
+      <h1 className='text-center'>Proposal History</h1>
+
+      <p className='text-center'>
+        Welcome to the DAO's proposal history. On this page, you'll find all proposals that have been finalized.
+      </p>
+
+      <hr />
+
+      <Table striped bordered hover responsive>
+        <thead>
+          <tr>
+            {headers.map((header, index) => (
+              <th key={index} className='text-center'>{header}</th>
+            ))}
           </tr>
-        ))}
-      </tbody>
-    </Table>
+        </thead>
+        <tbody>
+          {/* TODO: Replace with actual proposal data once Redux is set up */}
+          {proposals.map((proposal, index) => (
+            <tr key={index}>
+              {/* TODO: Insert logic to render each cell */}
+              <td className='text-center'>{proposal.id}</td>
+              {/* TODO: Input rest of table cells */}
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </>
   )
 }
 

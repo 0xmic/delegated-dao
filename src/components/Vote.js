@@ -32,25 +32,38 @@ const Vote = () => {
   ]
 
   return (
-    <Table striped bordered hover responsive>
-      <thead>
-        <tr>
-          {headers.map((header, index) => (
-            <th key={index} className='text-center'>{header}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {/* TODO: Replace with actual proposal data once Redux is set up */}
-        {proposals.map((proposal, index) => (
-          <tr key={index}>
-            {/* TODO: Insert logic to render each cell */}
-            <td className='text-center'>{proposal.id}</td>
-            {/* TODO: Input rest of table cells */}
+    <>
+      <h1 className='text-center'>Live Proposals</h1>
+      <p className='text-center'>
+        Welcome to the DAO's voting hub. On this page, you'll find all proposals that are currently up for voting.
+        <br />
+        As a DAO member, you can express your support or opposition to each proposal by 'Upvoting' or 'Downvoting' respectively.
+        <br />
+        Each vote you cast directly impacts the future direction of our DAO. Happy voting!
+      </p>
+
+      <hr />
+
+      <Table striped bordered hover responsive>
+        <thead>
+          <tr>
+            {headers.map((header, index) => (
+              <th key={index} className='text-center'>{header}</th>
+            ))}
           </tr>
-        ))}
-      </tbody>
-    </Table>
+        </thead>
+        <tbody>
+          {/* TODO: Replace with actual proposal data once Redux is set up */}
+          {proposals.map((proposal, index) => (
+            <tr key={index}>
+              {/* TODO: Insert logic to render each cell */}
+              <td className='text-center'>{proposal.id}</td>
+              {/* TODO: Input rest of table cells */}
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </>
   )
 }
 
