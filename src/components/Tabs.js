@@ -8,13 +8,16 @@ const Tabs = () => {
         <Nav.Link>Propose</Nav.Link>
       </LinkContainer>
       <LinkContainer to='/delegate'>
-        <Nav.Link>Delegate</Nav.Link>
+        <Nav.Link>Delegate Votes</Nav.Link>
+      </LinkContainer>
+      <LinkContainer to='/delegatees'>
+        <Nav.Link>Delegatees</Nav.Link>
       </LinkContainer>
       <LinkContainer to='/vote'>
         <Nav.Link>Vote</Nav.Link>
       </LinkContainer>
-      <LinkContainer to='/finalized'>
-        <Nav.Link>Finalized</Nav.Link>
+      <LinkContainer to='/history'>
+        <Nav.Link>History</Nav.Link>
       </LinkContainer>
     </Nav>
   );

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import Table from 'react-bootstrap/Table'
 
-const Finalized = () => {
+const History = () => {
   // TODO: Create Redux slice/reducer for 'proposals' and 'account' in Redux store
   // const proposals = useSelector(state => state.delegatedDAO.proposals)
   // const account = useSelector(state => state.provider.account)
@@ -31,7 +31,7 @@ const Finalized = () => {
       <h1 className='text-center'>Proposal History</h1>
 
       <p className='text-center'>
-        Welcome to the DAO's proposal history. On this page, you'll find all proposals that have been finalized.
+        Below are all proposals that have been finalized by the DAO.
       </p>
 
       <hr />
@@ -59,4 +59,4 @@ const Finalized = () => {
   )
 }
 
-export default Finalized
+export default History

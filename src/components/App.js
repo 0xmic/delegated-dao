@@ -9,8 +9,9 @@ import Navigation from './Navigation';
 import Tabs from './Tabs';
 import Propose from './Propose';
 import Delegate from './Delegate';
+import Delegatees from './Delegatees';
 import Vote from './Vote';
-import Finalized from './Finalized';
+import History from './History';
 
 import {
   loadAccount,
@@ -63,8 +64,9 @@ function App() {
         <Routes>
           <Route exact path="/" element={<Propose />} />
           <Route exact path="/delegate" element={<Delegate />} />
+          <Route exact path="/delegatees" element={<Delegatees />} />
           <Route exact path="/vote" element={<Vote />} />
-          <Route exact path="/finalized" element={<Finalized />} />
+          <Route exact path="/history" element={<History />} />
 
         </Routes>
 
