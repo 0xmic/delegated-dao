@@ -158,7 +158,7 @@ describe('Delegated DAO', () => {
       transaction = await delegatedDAO.connect(investor5).delegate(investorDelegate2.address)
       await transaction.wait()
 
-      // 1 investors delegate to investorDelegate3
+      // 1 investor delegate to investorDelegate3
       transaction = await token.connect(investor6).approve(delegatedDAO.address, 100000)
       await transaction.wait()
       transaction = await delegatedDAO.connect(investor6).delegate(investorDelegate3.address)
@@ -168,6 +168,14 @@ describe('Delegated DAO', () => {
     })
 
     describe('Success', () => {
+      it('updates delegatorBalance', async () => {
+        expect(await delegatedDAO.delegatorBalance(investor1.address)).to.equal(100000)
+        expect(await delegatedDAO.delegatorBalance(investor2.address)).to.equal(100000)
+        expect(await delegatedDAO.delegatorBalance(investor3.address)).to.equal(100000)
+        expect(await delegatedDAO.delegatorBalance(investor4.address)).to.equal(100000)
+        expect(await delegatedDAO.delegatorBalance(investor5.address)).to.equal(100000)
+      })
+
       it('updates delegateeDelegators', async () => {
         expect(await delegatedDAO.delegateeDelegators(investorDelegate1.address, 1)).to.equal(investor1.address)
 
@@ -322,6 +330,10 @@ describe('Delegated DAO', () => {
     })
 
     describe('Success', () => {
+      it('updates delegatorBalance', async () => {
+        expect(await delegatedDAO.delegatorBalance(investor1.address)).to.equal(0)
+      })
+
       it('removes delegator votes from delegateeVotesReceived', async () => {
         expect(await delegatedDAO.delegateeVotesReceived(investorDelegate1.address)).to.equal(0)
       })
