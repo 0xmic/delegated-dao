@@ -621,7 +621,7 @@ describe('Delegated DAO', () => {
 
     describe('Success', () => {
       beforeEach(async () => {
-        // Create proposal
+        // Create Proposal 1
         transaction = await delegatedDAO
           .connect(investor1)
           .createProposal('Proposal 1', 'Description 1', 50000, recipient.address)
@@ -661,13 +661,52 @@ describe('Delegated DAO', () => {
         expect(proposal.status).to.equal(1)
       })
 
-      it('emits a Finalize event', async () => {
+      it('emits a Finalize event that Passes', async () => {
         const event = result.events.filter((x) => {return x.event === "Finalize"});
 
         expect(event[0].args.id).to.equal(1)
         expect(event[0].args.recipient).to.equal(recipient.address)
         // 0 = Pending, 1 = Finalized, 2 = Rejected
         expect(event[0].args.status).to.equal(1)
+      })
+
+      it('emits a Finalize event that Fails', async () => {
+        // Create Proposal 2
+        transaction = await delegatedDAO
+          .connect(investor1)
+          .createProposal('Proposal 2', 'Description 2', 50000, recipient.address)
+        result = await transaction.wait()
+
+        // Up Vote
+        transaction = await delegatedDAO.connect(investor1).upVote(2)
+        result = await transaction.wait()
+
+        transaction = await delegatedDAO.connect(investor2).upVote(2)
+        result = await transaction.wait()
+
+        transaction = await delegatedDAO.connect(investor3).upVote(2)
+        result = await transaction.wait()
+
+        transaction = await delegatedDAO.connect(investor4).upVote(2)
+        result = await transaction.wait()
+
+        transaction = await delegatedDAO.connect(investor5).upVote(2)
+        result = await transaction.wait()
+
+        transaction = await delegatedDAO.connect(investor6).upVote(2)
+        result = await transaction.wait()
+
+        // Move time forward 7 days
+        await ethers.provider.send('evm_increaseTime', [7 * 24 * 60 * 60])
+        await ethers.provider.send('evm_mine')  // Mine a new block
+
+        // Finalize proposal
+        transaction = await delegatedDAO.connect(investor1).finalizeProposal(2)
+        result = await transaction.wait()
+
+        // Finalize event should update proposal status to Rejected
+        await expect(transaction).to.emit(delegatedDAO, 'Finalize')
+          .withArgs(2, recipient.address, 2)
       })
     })
 
