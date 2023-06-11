@@ -37,7 +37,9 @@ const Vote = () => {
       <p className='text-center'>
         Below are all proposals that are currently up for voting.
         <br />
-        As a DAO member, you can express your support or opposition to each proposal by 'Upvoting' or 'Downvoting' respectively.
+        As a DAO member, you can express your support or opposition to each proposal by 'Upvoting' or 'Downvoting',
+        <br />
+        where each vote is weighted by your voting power (i.e. the number of tokens you hold).
       </p>
 
       <hr />
