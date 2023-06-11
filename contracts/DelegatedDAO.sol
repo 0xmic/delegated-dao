@@ -12,6 +12,8 @@ contract DelegatedDAO {
     Token public token;
     uint256 public quorum;
 
+    enum ProposalStatus { Active, Passed, Failed }
+
     /* @notice Structure for proposals */
     struct Proposal {
         uint256 id;
@@ -20,7 +22,8 @@ contract DelegatedDAO {
         uint256 amount;
         address payable recipient;
         int256 votes;
-        bool finalized;
+        ProposalStatus status;
+        uint256 timestamp;
     }
 
     uint256 public proposalCount;
@@ -63,7 +66,7 @@ contract DelegatedDAO {
     event UpVote(uint256 id, address investor);
     event DownVote(uint256 id, address investor);
 
-    event Finalize(uint256 id, address recipient);
+    event Finalize(uint256 id, address recipient, ProposalStatus status);
 
     /* @notice Constructor for creating the DAO
      * @param _token The token used for the DAO
@@ -107,7 +110,8 @@ contract DelegatedDAO {
             _amount,
             _recipient,
             0,
-            false
+            ProposalStatus.Active,
+            block.timestamp
         );
 
         emit Propose(
@@ -151,7 +155,11 @@ contract DelegatedDAO {
         // Update delegatee's votes on live proposals
         for(uint256 i = 1; i <= proposalCount; i++) {
             // Check if the proposal is live, the delegatee has voted, and the delegator has not
-            if(proposals[i].finalized == false && votesCast[_delegatee][i] > 0 && votesCast[msg.sender][i] == 0) {
+            if (
+                proposals[i].status == ProposalStatus.Active &&
+                votesCast[_delegatee][i] > 0 &&
+                votesCast[msg.sender][i] == 0
+            ){
                 proposals[i].votes += int(amount);
             }
         }
@@ -176,7 +184,7 @@ contract DelegatedDAO {
         // Remove delegator's votes from live proposals
         for(uint256 i = 1; i <= proposalCount; i++) {
             // Check if the proposal is live, and the delegator has voted
-            if(proposals[i].finalized == false && votesCast[msg.sender][i] > 0) {
+            if(proposals[i].status == ProposalStatus.Active && votesCast[msg.sender][i] > 0) {
                 votesCast[removedDelegatee][i] -= int(amount);
                 votesCast[msg.sender][i] -= int(amount);
                 proposals[i].votes -= int(amount);
@@ -272,14 +280,20 @@ contract DelegatedDAO {
     function finalizeProposal(uint256 _id) external onlyInvestor {
         Proposal storage proposal = proposals[_id];
 
-        require(!proposal.finalized, "Already finalized");
+        require(proposal.status == ProposalStatus.Active, "Already finalized");
+
+        if(block.timestamp > proposal.timestamp + 3 days) {
+            proposal.status = ProposalStatus.Failed;
+            emit Finalize(_id, proposal.recipient, ProposalStatus.Failed);
+            return;
+        }
+
         require(proposal.votes >= int(quorum) && proposal.votes > 0, "Not enough votes");
         require(token.balanceOf(address(this)) >= proposal.amount, "Not enough funds");
 
         require(token.transfer(proposal.recipient, proposal.amount), "Transfer failed");
+        proposal.status = ProposalStatus.Passed;
 
-        proposal.finalized = true;
-
-        emit Finalize(_id, proposal.recipient);
+        emit Finalize(_id, proposal.recipient, ProposalStatus.Passed);
     }
 }

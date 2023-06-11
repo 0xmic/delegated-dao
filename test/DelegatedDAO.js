@@ -657,11 +657,17 @@ describe('Delegated DAO', () => {
 
       it('updates the proposal to finalized', async () => {
         const proposal = await delegatedDAO.proposals(1)
-        expect(proposal.finalized).to.equal(true)
+        // 0 = Pending, 1 = Finalized, 2 = Rejected
+        expect(proposal.status).to.equal(1)
       })
 
       it('emits a Finalize event', async () => {
-        await expect(transaction).to.emit(delegatedDAO, 'Finalize').withArgs(1, recipient.address)
+        const event = result.events.filter((x) => {return x.event === "Finalize"});
+
+        expect(event[0].args.id).to.equal(1)
+        expect(event[0].args.recipient).to.equal(recipient.address)
+        // 0 = Pending, 1 = Finalized, 2 = Rejected
+        expect(event[0].args.status).to.equal(1)
       })
     })
 
