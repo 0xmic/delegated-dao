@@ -10,6 +10,11 @@
         "internalType": "uint256",
         "name": "_quorum",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_votingPeriodHours",
+        "type": "uint256"
       }
     ],
     "stateMutability": "nonpayable",
@@ -21,14 +26,26 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "from",
+        "name": "delegator",
         "type": "address"
       },
       {
         "indexed": true,
         "internalType": "address",
-        "name": "to",
+        "name": "delegatee",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
       }
     ],
     "name": "Delegate",
@@ -67,6 +84,12 @@
         "internalType": "address",
         "name": "recipient",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "enum DelegatedDAO.ProposalStatus",
+        "name": "status",
+        "type": "uint8"
       }
     ],
     "name": "Finalize",
@@ -115,14 +138,26 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "from",
+        "name": "delegator",
         "type": "address"
       },
       {
         "indexed": true,
         "internalType": "address",
-        "name": "to",
+        "name": "delegatee",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
       }
     ],
     "name": "Undelegate",
@@ -282,6 +317,25 @@
         "type": "address"
       }
     ],
+    "name": "delegatorBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
     "name": "delegatorDelegatee",
     "outputs": [
       {
@@ -373,9 +427,14 @@
         "type": "int256"
       },
       {
-        "internalType": "bool",
-        "name": "finalized",
-        "type": "bool"
+        "internalType": "enum DelegatedDAO.ProposalStatus",
+        "name": "status",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -446,6 +505,19 @@
         "internalType": "int256",
         "name": "",
         "type": "int256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "votingPeriodHours",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",

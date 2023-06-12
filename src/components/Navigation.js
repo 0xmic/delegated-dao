@@ -8,21 +8,25 @@ import logo from '../logo.png'
 
 import {
   loadAccount,
-  loadBalance
+  loadBalance,
+  loadDelegatorBalance
 } from '../store/interactions'
 
 import config from '../config.json'
 
 const Navigation = () => {
+  let balance, delegatorBalance
   const chainId = useSelector(state => state.provider.chainId)
   const account = useSelector(state => state.provider.account)
   const token = useSelector(state => state.token.contract)
+  const delegatedDAO = useSelector(state => state.delegatedDAO.contract)
 
   const dispatch = useDispatch()
 
   const connectHandler = async () => {
     const account = await loadAccount(dispatch)
-    await loadBalance(token, account, dispatch)
+    const balance = await loadBalance(token, account, dispatch)
+    const delegatorBalance = await loadDelegatorBalance(delegatedDAO, account, dispatch)
   }
 
   const networkHandler = async (e) => {

@@ -13,7 +13,11 @@ import {
 } from './reducers/token'
 
 import {
-  setDelegatedDAOContract
+  setDelegatedDAOContract,
+  delegatorBalanceLoaded,
+  proposeRequest,
+  proposeSuccess,
+  proposeFail
 } from './reducers/delegatedDAO'
 
 import TOKEN_ABI from '../abis/Token.json'
@@ -66,4 +70,34 @@ export const loadBalance = async (token, account, dispatch) => {
   const balance = await token.balanceOf(account)
 
   dispatch(balanceLoaded(ethers.utils.formatUnits(balance.toString(), 'ether')))
+}
+
+// ---------------------------------------------------------------------------------
+// LOAD DELEGATOR BALANCE
+export const loadDelegatorBalance = async (delegatedDAO, account, dispatch) => {
+  const delegatorBalance = await delegatedDAO.delegatorBalance(account)
+
+  dispatch(delegatorBalanceLoaded(ethers.utils.formatUnits(delegatorBalance.toString(), 'ether')))
+
+  return delegatorBalance
+}
+
+// ---------------------------------------------------------------------------------
+// CREATE PROPOSAL
+export const createProposal = async (provider, delegatedDAO, title, description, amount, recipient, dispatch) => {
+  try {
+    dispatch(proposeRequest())
+
+    let transaction
+
+    const signer = await provider.getSigner()
+
+    transaction = await delegatedDAO.connect(signer).createProposal(title, description, amount, recipient)
+    await transaction.wait()
+
+    dispatch(proposeSuccess(transaction.hash))
+
+  } catch (error) {
+    dispatch(proposeFail())
+  }
 }
