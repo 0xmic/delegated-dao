@@ -130,29 +130,41 @@ async function main() {
 
   // 3 investors delegate to investorDelegate1
   console.log(`InvestorDelegate1 address: ${investorDelegate1.address}`)
+  transaction = await token.connect(investor1).approve(delegatedDAO.address, tokens(100000))
+  await transaction.wait()
   transaction = await delegatedDAO.connect(investor1).delegate(investorDelegate1.address)
   await transaction.wait()
   console.log(`Investor1 delegate: ${(await delegatedDAO.delegatorDelegatee(investor1.address))}`)
 
+  transaction = await token.connect(investor2).approve(delegatedDAO.address, tokens(100000))
+  await transaction.wait()
   transaction = await delegatedDAO.connect(investor2).delegate(investorDelegate1.address)
   await transaction.wait()
   console.log(`Investor2 delegate: ${(await delegatedDAO.delegatorDelegatee(investor2.address))}`)
 
+  transaction = await token.connect(investor3).approve(delegatedDAO.address, tokens(100000))
+  await transaction.wait()
   transaction = await delegatedDAO.connect(investor3).delegate(investorDelegate1.address)
   await transaction.wait()
   console.log(`Investor3 delegate: ${(await delegatedDAO.delegatorDelegatee(investor3.address))}\n`)
 
   // 2 investor delegates to investorDelegate2
   console.log(`InvestorDelegate2 address: ${investorDelegate2.address}`)
+  transaction = await token.connect(investor4).approve(delegatedDAO.address, tokens(100000))
+  await transaction.wait()
   transaction = await delegatedDAO.connect(investor4).delegate(investorDelegate2.address)
   await transaction.wait()
   console.log(`Investor4 delegate: ${(await delegatedDAO.delegatorDelegatee(investor4.address))}`)
 
+  transaction = await token.connect(investor5).approve(delegatedDAO.address, tokens(100000))
+  await transaction.wait()
   transaction = await delegatedDAO.connect(investor5).delegate(investorDelegate2.address)
   await transaction.wait()
   console.log(`Investor5 delegate: ${(await delegatedDAO.delegatorDelegatee(investor5.address))}\n`)
 
   // 1 investors delegate to investorDelegate3
+  transaction = await token.connect(investor6).approve(delegatedDAO.address, tokens(100000))
+  await transaction.wait()
   console.log(`InvestorDelegate3 address: ${investorDelegate3.address}`)
   transaction = await delegatedDAO.connect(investor6).delegate(investorDelegate3.address)
   await transaction.wait()
@@ -227,7 +239,7 @@ async function main() {
   console.log(`Investor1 finalizes proposal 1...`)
   transaction = await delegatedDAO.connect(investor1).finalizeProposal(1)
   await transaction.wait()
-  console.log(`Proposal 1 finalized: ${(await delegatedDAO.proposals(1)).finalized}\n`)
+  console.log(`Proposal 1 finalized and passed (0 = Active, 1 = Passed, 2 = Failed): ${(await delegatedDAO.proposals(1)).status}\n`)
 
 }
 
