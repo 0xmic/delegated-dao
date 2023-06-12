@@ -64,8 +64,9 @@ describe('Delegated DAO', () => {
 
     // Deploy DAO
     // Set quorum to > 25% of total token supply (500k tokens)
+    // Set votingPeriodHours to 72 (3 days)
     const DelegatedDAO = await ethers.getContractFactory('DelegatedDAO')
-    delegatedDAO = await DelegatedDAO.deploy(token.address, 500001)
+    delegatedDAO = await DelegatedDAO.deploy(token.address, 500001, 72)
 
     // Send remaining tokens to DAO treasury - 50% (1M) of total supply
     transaction = await token.connect(deployer).transfer(delegatedDAO.address, 1000000)

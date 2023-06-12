@@ -11,6 +11,7 @@ contract DelegatedDAO {
     address owner;
     Token public token;
     uint256 public quorum;
+    uint256 public votingPeriodHours;
 
     enum ProposalStatus { Active, Passed, Failed }
 
@@ -72,10 +73,11 @@ contract DelegatedDAO {
      * @param _token The token used for the DAO
      * @param _quorum The minimum number of votes required for a proposal to pass
      */
-    constructor(Token _token, uint256 _quorum) {
+    constructor(Token _token, uint256 _quorum, uint256 _votingPeriodHours) {
         owner = msg.sender;
         token = _token;
         quorum = _quorum;
+        votingPeriodHours = _votingPeriodHours;
     }
 
     /* @notice Modifier to ensure the function caller is a token holder */
@@ -282,7 +284,8 @@ contract DelegatedDAO {
 
         require(proposal.status == ProposalStatus.Active, "Already finalized");
 
-        if(block.timestamp > proposal.timestamp + 3 days) {
+        // Check if the voting period has ended
+        if(block.timestamp > proposal.timestamp + (votingPeriodHours * 60 * 60)) {
             proposal.status = ProposalStatus.Failed;
             emit Finalize(_id, proposal.recipient, ProposalStatus.Failed);
             return;

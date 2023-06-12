@@ -10,6 +10,7 @@ async function main() {
   const MAX_SUPPLY = 2000000
   const decimals = 18
   const quorum = 0.25
+  const votingPeriodHours = 72
 
   // Deploy Token
   const Token = await hre.ethers.getContractFactory('Token')
@@ -24,7 +25,7 @@ async function main() {
 
   // Deploy DelegatedDAO
   const DelegatedDAO = await hre.ethers.getContractFactory('DelegatedDAO')
-  let delegatedDAO = await DelegatedDAO.deploy(token.address, hre.ethers.utils.parseUnits((quorum*MAX_SUPPLY).toString(), decimals));
+  let delegatedDAO = await DelegatedDAO.deploy(token.address, hre.ethers.utils.parseUnits((quorum*MAX_SUPPLY).toString(), decimals), votingPeriodHours);
   await delegatedDAO.deployed()
 
   console.log(`DelegatedDAO deployed to: ${delegatedDAO.address}`)
