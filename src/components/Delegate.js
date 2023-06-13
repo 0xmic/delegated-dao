@@ -5,6 +5,7 @@ import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import Spinner from 'react-bootstrap/Spinner'
 import Table from 'react-bootstrap/Table'
+import Blockies from 'react-blockies'
 
 import { ethers } from 'ethers'
 
@@ -16,17 +17,10 @@ const Delegate = () => {
   const dispatch = useDispatch()
 
   const account = useSelector(state => state.provider.account)
-  console.log(`account: ${account}`)
-  console.log(`typeof account: ${typeof(account)}`)
   const balance = useSelector(state => state.token.balance)
-  console.log(`balance: ${balance}`)
-  console.log(`typeof balance: ${typeof(balance)}`)
+  const delegatorDelegatee = useSelector(state => state.delegatedDAO.delegatorDelegatee)
   const delegatorBalance = useSelector(state => state.delegatedDAO.delegatorBalance)
-  console.log(`delegatorBalance: ${delegatorBalance}`)
-  console.log(`typeof delegatorBalance: ${typeof(delegatorBalance)}`)
   const delegateeVotesReceived = useSelector(state => state.delegatedDAO.delegateeVotesReceived)
-  console.log(`delegateeVotesReceived: ${delegateeVotesReceived}`)
-  console.log(`typeof delegateeVotesReceived: ${typeof(delegateeVotesReceived)}`)
 
   const delegateHandler = async (e) => {
     e.preventDefault()
@@ -81,7 +75,6 @@ const Delegate = () => {
                   isInvalid={!!error}
                   onChange={(e) => {
                     setDelegate(e.target.value)
-                    console.log(`Set Delegate handler: ${delegate}`)
                   }}
                 />
                 <Form.Control.Feedback type='invalid'>{error}</Form.Control.Feedback>
@@ -96,7 +89,7 @@ const Delegate = () => {
             </Form>
           </Card>
         </>
-      ) : delegatorBalance > 0 ? (
+      ) : Number(delegatorBalance) > 0 ? (
         <>
           {/* User has delegated - allow Undelegation*/}
 
@@ -109,8 +102,19 @@ const Delegate = () => {
             </thead>
             <tbody>
                 <tr key={0}>
-                  <td className='text-center'>Delegate Address</td>
-                  <td className='text-center'># of Tokens Delegated</td>
+                <td className='d-flex align-items-center justify-content-center'>
+                    <Blockies
+                      seed={delegatorDelegatee}
+                      size={10}
+                      scale={3}
+                      color='#e6e6e6'
+                      bgColor='#000000'
+                      spotColor='#ffffff'
+                      className="identicon mx-2"
+                    />
+                    {delegatorDelegatee}
+                  </td>
+                  <td className='text-center'>{delegatorBalance}</td>
                 </tr>
             </tbody>
           </Table>
@@ -127,7 +131,7 @@ const Delegate = () => {
           </Form>
         </>
 
-      ) : delegateeVotesReceived > 0 ? (
+      ) : Number(delegateeVotesReceived) > 0 ? (
         <>
           {/* User is delegatee - no delegation allowed */}
 
