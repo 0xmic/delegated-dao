@@ -18,6 +18,8 @@ const Propose = () => {
   const [recipient, setRecipient] = useState('')
   const [error, setError] = useState('')
 
+  const [formKey, setFormKey] = useState(Math.random());
+
   const provider = useSelector(state => state.provider.connection)
 
   const account = useSelector(state => state.provider.account)
@@ -37,14 +39,21 @@ const Propose = () => {
       return
     }
 
-    setError('') // reset error message when the address is valid
+    // reset error message when the address is valid
+    setError('')
 
     createProposal(provider, delegatedDAO, title, description, amount, recipient, dispatch)
-    // setIsWaiting(true)
   }
 
   useEffect(() => {
-  }, [])
+    if (!isProposing && !error) {
+      setTitle('')
+      setDescription('')
+      setAmount(0)
+      setRecipient('')
+      setFormKey(Math.random());
+    }
+  }, [isProposing, error])
 
   return (
     <>
@@ -58,7 +67,7 @@ const Propose = () => {
 
       <Card style={{ maxWidth: '450px' }} className='mx-auto px-4'>
         {account && (balance > 0 || delegatorBalance > 0) ? (
-          <Form onSubmit={proposeHandler}>
+          <Form key={formKey} onSubmit={proposeHandler}>
             <Form.Group style={{ maxWidth: '450px', margin: '50px auto' }}>
               <Form.Control
                 type='text'
@@ -66,7 +75,6 @@ const Propose = () => {
                 className='my-2'
                 onChange={(e) => {
                   setTitle(e.target.value)
-                  // console.log(`Set Title handler: ${title}`)
                 }}
               />
               <Form.Control
@@ -75,7 +83,6 @@ const Propose = () => {
                 className='my-2'
                 onChange={(e) => {
                   setDescription(e.target.value)
-                  // console.log(`Set Description handler: ${description}`)
                 }}
               />
               <Form.Control
@@ -89,7 +96,6 @@ const Propose = () => {
                       value = 0;
                   }
                   setAmount(value);
-                  // console.log(`Set Number handler: ${amount}`);
                 }}
               />
               <Form.Control
@@ -99,7 +105,6 @@ const Propose = () => {
                 isInvalid={!!error}
                 onChange={(e) => {
                   setRecipient(e.target.value)
-                  // console.log(`Set Address handler: ${recipient}`)
                 }}
               />
               <Form.Control.Feedback type='invalid'>{error}</Form.Control.Feedback>
