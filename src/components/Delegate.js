@@ -169,7 +169,7 @@ const Delegate = () => {
 
           <Card style={{ maxWidth: '450px' }} className='mx-auto px-4'>
             <p
-              className='d-flex justify-content-center align-items-center text-center'
+              className='d-flex flex-column justify-content-center align-items-center text-center'
               style={{ height: '300px' }}
             >
               You have received delegated voting power.
@@ -178,6 +178,13 @@ const Delegate = () => {
               <br/>
               <br/>
               (i.e. no chained delegation)
+              <br />
+              <br />
+              -
+              <br />
+              <br />
+              <strong>Votes Received:</strong>
+              {parseInt(delegateeVotesReceived).toLocaleString()} CT
             </p>
           </Card>
         </>
@@ -191,7 +198,7 @@ const Delegate = () => {
               className='d-flex justify-content-center align-items-center text-center'
               style={{ height: '300px' }}
             >
-              Only DAO members may vote on proposals.
+              Not a DAO member.
             </p>
           </Card>
         </>

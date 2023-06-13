@@ -138,27 +138,19 @@ export const createProposal = async (provider, delegatedDAO, title, description,
 // DELEGATE VOTES
 export const delegateVotes = async (provider, token, balance, delegatedDAO, delegate, dispatch) => {
   try {
-    console.log('there was an attempt')
     dispatch(delegateRequest())
-    console.log('2')
 
     let transaction
 
     const signer = await provider.getSigner()
 
-    // console.log(`balance: ${balance}`)
-    // console.log(`typeof balance: ${typeof(balance)}`)
-    // console.log(`tokens(balance): ${tokens(balance)}`)
-    console.log('2.5')
     transaction = await token.connect(signer).approve(delegatedDAO.address, tokens(balance))
     await transaction.wait()
 
     transaction = await delegatedDAO.connect(signer).delegate(delegate)
     await transaction.wait()
 
-    console.log('3')
     dispatch(delegateSuccess(transaction.hash))
-    console.log('4')
 
   } catch (error) {
     dispatch(delegateFail())
