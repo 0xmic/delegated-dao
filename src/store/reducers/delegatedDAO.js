@@ -5,6 +5,7 @@ export const delegatedDAO = createSlice({
   initialState: {
     contract: null,
     delegatorBalance: 0,
+    delegateeVotesReceived: 0,
     proposing: {
       isProposing: false,
       isSuccess: false,
@@ -17,6 +18,9 @@ export const delegatedDAO = createSlice({
     },
     delegatorBalanceLoaded: (state, action) => {
       state.delegatorBalance = action.payload
+    },
+    delegateeVotesReceivedLoaded: (state, action) => {
+      state.delegateeVotesReceived = action.payload
     },
     proposeRequest: (state, action) => {
       state.proposing.isProposing = true
@@ -39,6 +43,7 @@ export const delegatedDAO = createSlice({
 export const {
   setDelegatedDAOContract,
   delegatorBalanceLoaded,
+  delegateeVotesReceivedLoaded,
   proposeRequest,
   proposeSuccess,
   proposeFail

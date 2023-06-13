@@ -9,7 +9,8 @@ import logo from '../logo.png'
 import {
   loadAccount,
   loadBalance,
-  loadDelegatorBalance
+  loadDelegatorBalance,
+  loadDelegateeVotesReceived
 } from '../store/interactions'
 
 import config from '../config.json'
@@ -26,6 +27,7 @@ const Navigation = () => {
     const account = await loadAccount(dispatch)
     const balance = await loadBalance(token, account, dispatch)
     const delegatorBalance = await loadDelegatorBalance(delegatedDAO, account, dispatch)
+    const delegateeVotesReceived = await loadDelegateeVotesReceived(delegatedDAO, account, dispatch)
   }
 
   const networkHandler = async (e) => {

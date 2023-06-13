@@ -15,6 +15,7 @@ import {
 import {
   setDelegatedDAOContract,
   delegatorBalanceLoaded,
+  delegateeVotesReceivedLoaded,
   proposeRequest,
   proposeSuccess,
   proposeFail
@@ -80,6 +81,16 @@ export const loadDelegatorBalance = async (delegatedDAO, account, dispatch) => {
   dispatch(delegatorBalanceLoaded(ethers.utils.formatUnits(delegatorBalance.toString(), 'ether')))
 
   return delegatorBalance
+}
+
+// ---------------------------------------------------------------------------------
+// LOAD DELEGATEE VOTES RECEIVED
+export const loadDelegateeVotesReceived = async (delegatedDAO, account, dispatch) => {
+  const delegateeVotesReceived = await delegatedDAO.delegateeVotesReceived(account)
+
+  dispatch(delegateeVotesReceivedLoaded(ethers.utils.formatUnits(delegateeVotesReceived.toString(), 'ether')))
+
+  return delegateeVotesReceived
 }
 
 // ---------------------------------------------------------------------------------
