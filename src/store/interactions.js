@@ -19,12 +19,22 @@ import {
   delegateeVotesReceivedLoaded,
   proposeRequest,
   proposeSuccess,
-  proposeFail
+  proposeFail,
+  delegateRequest,
+  delegateSuccess,
+  delegateFail,
+  undelegateRequest,
+  undelegateSuccess,
+  undelegateFail
 } from './reducers/delegatedDAO'
 
 import TOKEN_ABI from '../abis/Token.json'
 import DELEGATEDDAO_ABI from '../abis/DelegatedDAO.json'
 import config from '../config.json'
+
+const tokens = (n) => {
+  return ethers.utils.parseUnits(n.toString(), 'ether')
+}
 
 export const loadProvider = (dispatch) => {
   const provider = new ethers.providers.Web3Provider(window.ethereum)
@@ -121,5 +131,56 @@ export const createProposal = async (provider, delegatedDAO, title, description,
 
   } catch (error) {
     dispatch(proposeFail())
+  }
+}
+
+// ---------------------------------------------------------------------------------
+// DELEGATE VOTES
+export const delegateVotes = async (provider, token, balance, delegatedDAO, delegate, dispatch) => {
+  try {
+    console.log('there was an attempt')
+    dispatch(delegateRequest())
+    console.log('2')
+
+    let transaction
+
+    const signer = await provider.getSigner()
+
+    // console.log(`balance: ${balance}`)
+    // console.log(`typeof balance: ${typeof(balance)}`)
+    // console.log(`tokens(balance): ${tokens(balance)}`)
+    console.log('2.5')
+    transaction = await token.connect(signer).approve(delegatedDAO.address, tokens(balance))
+    await transaction.wait()
+
+    transaction = await delegatedDAO.connect(signer).delegate(delegate)
+    await transaction.wait()
+
+    console.log('3')
+    dispatch(delegateSuccess(transaction.hash))
+    console.log('4')
+
+  } catch (error) {
+    dispatch(delegateFail())
+  }
+}
+
+// ---------------------------------------------------------------------------------
+// UNDELEGATE VOTES
+export const undelegateVotes = async (provider, delegatedDAO, dispatch) => {
+  try {
+    dispatch(undelegateRequest())
+
+    let transaction
+
+    const signer = await provider.getSigner()
+
+    transaction = await delegatedDAO.connect(signer).undelegate()
+    await transaction.wait()
+
+    dispatch(undelegateSuccess(transaction.hash))
+
+  } catch (error) {
+    dispatch(undelegateFail())
   }
 }

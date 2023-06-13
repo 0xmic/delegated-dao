@@ -10,11 +10,11 @@ const Tabs = () => {
       <LinkContainer to='/delegate'>
         <Nav.Link>Delegate Votes</Nav.Link>
       </LinkContainer>
-      <LinkContainer to='/delegatees'>
-        <Nav.Link>Delegatees</Nav.Link>
-      </LinkContainer>
       <LinkContainer to='/vote'>
         <Nav.Link>Vote</Nav.Link>
+      </LinkContainer>
+      <LinkContainer to='/delegatees'>
+        <Nav.Link>Delegatees</Nav.Link>
       </LinkContainer>
       <LinkContainer to='/history'>
         <Nav.Link>History</Nav.Link>

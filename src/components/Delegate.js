@@ -9,19 +9,32 @@ import Blockies from 'react-blockies'
 
 import { ethers } from 'ethers'
 
+import {
+  delegateVotes,
+  undelegateVotes
+} from '../store/interactions'
+
 const Delegate = () => {
   const [delegate, setDelegate] = useState('')
-  const [isWaiting, setIsWaiting] = useState(false)
   const [error, setError] = useState('')
+
+  const [formKey, setFormKey] = useState(Math.random());
 
   const dispatch = useDispatch()
 
+  const provider = useSelector(state => state.provider.connection)
   const account = useSelector(state => state.provider.account)
   const balance = useSelector(state => state.token.balance)
+  const token = useSelector(state => state.token.contract)
+  const delegatedDAO = useSelector(state => state.delegatedDAO.contract)
   const delegatorDelegatee = useSelector(state => state.delegatedDAO.delegatorDelegatee)
   const delegatorBalance = useSelector(state => state.delegatedDAO.delegatorBalance)
   const delegateeVotesReceived = useSelector(state => state.delegatedDAO.delegateeVotesReceived)
 
+  const isDelegating = useSelector(state => state.delegatedDAO.delegating.isDelegating)
+  const isUndelegating = useSelector(state => state.delegatedDAO.undelegating.isUndelegating)
+
+  //-----------------------------------------------------------------------
   const delegateHandler = async (e) => {
     e.preventDefault()
 
@@ -30,17 +43,34 @@ const Delegate = () => {
       return
     }
 
-    setIsWaiting(true)
-    setError('') // reset error message when the address is valid
+    // reset error message when the address is valid
+    setError('')
+
+    delegateVotes(provider, token, balance, delegatedDAO, delegate, dispatch)
+      .then(() => {
+        window.location.reload();
+      })
+      .catch(err => console.error(err));
   }
 
   const undelegateHandler = async (e) => {
     e.preventDefault()
-    setIsWaiting(true)
+
+    undelegateVotes(provider, delegatedDAO, dispatch)
+      .then(() => {
+        window.location.reload();
+      })
+      .catch(err => console.error(err));
   }
 
+  //--------------------------------------------------------------------------
+
   useEffect(() => {
-  }, [])
+    if (!isDelegating && !error) {
+      setDelegate('')
+      setFormKey(Math.random());
+    }
+  }, [isDelegating, isUndelegating, error])
 
   return (
     <>
@@ -66,7 +96,7 @@ const Delegate = () => {
           {/* User is investor, has not received delegation, and has not delegated their votes - allow Delegation */}
 
           <Card style={{ maxWidth: '450px' }} className='mx-auto px-4'>
-            <Form onSubmit={delegateHandler}>
+            <Form key={formKey} onSubmit={delegateHandler}>
               <Form.Group style={{ maxWidth: '450px', margin: '50px auto' }}>
                 <Form.Control
                   type='text'
@@ -78,8 +108,8 @@ const Delegate = () => {
                   }}
                 />
                 <Form.Control.Feedback type='invalid'>{error}</Form.Control.Feedback>
-                {isWaiting ? (
-                  <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} />
+                {isDelegating ? (
+                <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} />
                 ) : (
                   <Button variant='primary' type='submit' style={{ width: '100%' }}>
                     Delegate Votes
@@ -114,13 +144,15 @@ const Delegate = () => {
                     />
                     {delegatorDelegatee}
                   </td>
-                  <td className='text-center'>{delegatorBalance}</td>
+                  <td className='text-center'>
+                    {parseInt(delegatorBalance).toLocaleString()} CT
+                  </td>
                 </tr>
             </tbody>
           </Table>
           <Form onSubmit={undelegateHandler}>
             <Form.Group style={{ maxWidth: '450px', margin: '25px auto' }}>
-              {isWaiting ? (
+              {isUndelegating ? (
                 <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} />
               ) : (
                 <Button variant='primary' type='submit' style={{ width: '100%' }}>
@@ -159,7 +191,7 @@ const Delegate = () => {
               className='d-flex justify-content-center align-items-center text-center'
               style={{ height: '300px' }}
             >
-              Not a DAO member.
+              Only DAO members may vote on proposals.
             </p>
           </Card>
         </>

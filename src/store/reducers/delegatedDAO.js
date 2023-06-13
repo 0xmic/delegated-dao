@@ -11,6 +11,16 @@ export const delegatedDAO = createSlice({
       isProposing: false,
       isSuccess: false,
       transactionHash: null
+    },
+    delegating: {
+      isDelegating: false,
+      isSuccess: false,
+      transactionHash: null
+    },
+    undelegating: {
+      isUndelegating: false,
+      isSuccess: false,
+      transactionHash: null
     }
   },
   reducers: {
@@ -40,6 +50,36 @@ export const delegatedDAO = createSlice({
       state.proposing.isProposing = false
       state.proposing.isSuccess = false
       state.proposing.transactionHash = null
+    },
+    delegateRequest: (state, action) => {
+      state.delegating.isDelegating = true
+      state.delegating.isSuccess = false
+      state.delegating.transactionHash = null
+    },
+    delegateSuccess: (state, action) => {
+      state.delegating.isDelegating = false
+      state.delegating.isSuccess = true
+      state.delegating.transactionHash = action.payload
+    },
+    delegateFail: (state, action) => {
+      state.delegating.isDelegating = false
+      state.delegating.isSuccess = false
+      state.delegating.transactionHash = null
+    },
+    undelegateRequest: (state, action) => {
+      state.undelegating.isUndelegating = true
+      state.undelegating.isSuccess = false
+      state.undelegating.transactionHash = null
+    },
+    undelegateSuccess: (state, action) => {
+      state.undelegating.isUndelegating = false
+      state.undelegating.isSuccess = true
+      state.undelegating.transactionHash = action.payload
+    },
+    undelegateFail: (state, action) => {
+      state.undelegating.isUndelegating = false
+      state.undelegating.isSuccess = false
+      state.undelegating.transactionHash = null
     }
   }
 })
@@ -51,7 +91,13 @@ export const {
   delegateeVotesReceivedLoaded,
   proposeRequest,
   proposeSuccess,
-  proposeFail
+  proposeFail,
+  delegateRequest,
+  delegateSuccess,
+  delegateFail,
+  undelegateRequest,
+  undelegateSuccess,
+  undelegateFail
 } = delegatedDAO.actions;
 
 export default delegatedDAO.reducer;
