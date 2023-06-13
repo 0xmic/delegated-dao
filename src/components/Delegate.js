@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import Spinner from 'react-bootstrap/Spinner'
@@ -44,28 +45,31 @@ const Delegate = () => {
       </p>
 
       <hr />
-      <Form onSubmit={delegateHandler}>
-        <Form.Group style={{ maxWidth: '450px', margin: '50px auto' }}>
-          <Form.Control
-            type='text'
-            placeholder='Enter delegate address'
-            className='my-2'
-            isInvalid={!!error}
-            onChange={(e) => {
-              setDelegate(e.target.value)
-              console.log(`Set Delegate handler: ${delegate}`)
-            }}
-          />
-          <Form.Control.Feedback type='invalid'>{error}</Form.Control.Feedback>
-          {isWaiting ? (
-            <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} />
-          ) : (
-            <Button variant='primary' type='submit' style={{ width: '100%' }}>
-              Delegate Votes
-            </Button>
-          )}
-        </Form.Group>
-      </Form>
+
+      <Card style={{ maxWidth: '450px' }} className='mx-auto px-4'>
+        <Form onSubmit={delegateHandler}>
+          <Form.Group style={{ maxWidth: '450px', margin: '50px auto' }}>
+            <Form.Control
+              type='text'
+              placeholder='Enter delegate address'
+              className='my-2'
+              isInvalid={!!error}
+              onChange={(e) => {
+                setDelegate(e.target.value)
+                console.log(`Set Delegate handler: ${delegate}`)
+              }}
+            />
+            <Form.Control.Feedback type='invalid'>{error}</Form.Control.Feedback>
+            {isWaiting ? (
+              <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} />
+            ) : (
+              <Button variant='primary' type='submit' style={{ width: '100%' }}>
+                Delegate Votes
+              </Button>
+            )}
+          </Form.Group>
+        </Form>
+      </Card>
 
       <hr />
       <hr />
@@ -86,7 +90,7 @@ const Delegate = () => {
       </tbody>
     </Table>
     <Form onSubmit={undelegateHandler}>
-        <Form.Group style={{ maxWidth: '450px', margin: '50px auto' }}>
+        <Form.Group style={{ maxWidth: '450px', margin: '25px auto' }}>
           {isWaiting ? (
             <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} />
           ) : (

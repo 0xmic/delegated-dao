@@ -15,7 +15,6 @@ import {
 import config from '../config.json'
 
 const Navigation = () => {
-  let balance, delegatorBalance
   const chainId = useSelector(state => state.provider.chainId)
   const account = useSelector(state => state.provider.account)
   const token = useSelector(state => state.token.contract)
