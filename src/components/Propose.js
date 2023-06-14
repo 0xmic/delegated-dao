@@ -29,6 +29,7 @@ const Propose = () => {
   const dispatch = useDispatch()
 
   const balance = useSelector(state => state.token.balance)
+  const daoBalance = useSelector(state => state.token.daoBalance)
   const delegatorBalance = useSelector(state => state.delegatedDAO.delegatorBalance)
 
   const proposeHandler = async (e) => {
@@ -61,6 +62,16 @@ const Propose = () => {
 
       <p className='text-center'>
         DAO members can create new proposals to be voted on by the DAO.
+        <br />
+        Proposals can be voted on to distribute (CT) tokens held in the DAO treasury to individuals who wish to provide services to the DAO.
+        <br />
+        <br />
+        <strong>Proposal Requirements:</strong>
+        <br />
+        The DAO treasury must hold enough tokens to distribute to proposal recipient.
+        <br />
+        <br />
+        <strong>DAO Treasury:</strong> {parseInt(daoBalance).toLocaleString()} CT
       </p>
 
       <hr />

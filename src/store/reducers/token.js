@@ -5,7 +5,8 @@ export const token = createSlice({
   initialState: {
     contract: null,
     symbol: null,
-    balance: 0
+    balance: 0,
+    daoBalance: 0
   },
   reducers: {
     setTokenContract: (state, action) => {
@@ -16,6 +17,9 @@ export const token = createSlice({
     },
     balanceLoaded: (state, action) => {
       state.balance = action.payload
+    },
+    daoBalanceLoaded: (state, action) => {
+      state.daoBalance = action.payload
     }
   }
 })
@@ -23,7 +27,8 @@ export const token = createSlice({
 export const {
   setTokenContract,
   setSymbol,
-  balanceLoaded
+  balanceLoaded,
+  daoBalanceLoaded
 } = token.actions;
 
 export default token.reducer;

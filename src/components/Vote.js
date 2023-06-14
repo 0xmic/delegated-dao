@@ -39,7 +39,8 @@ const Vote = () => {
     'Status',
     'Upvote',
     'Downvote',
-    'Finalize'
+    'Finalize',
+    'Deadline'
   ]
 
   return (

@@ -39,6 +39,7 @@ function App() {
     // Fetch current account from Metamask when changed
     window.ethereum.on('accountsChanged', async (accounts) => {
       await loadAccount(dispatch)
+      window.location.reload()
     })
 
     // Fetch token contract

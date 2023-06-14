@@ -9,7 +9,8 @@ import {
 import {
   setTokenContract,
   setSymbol,
-  balanceLoaded
+  balanceLoaded,
+  daoBalanceLoaded
 } from './reducers/token'
 
 import {
@@ -77,11 +78,17 @@ export const loadDelegatedDAO = async (provider, chainId, dispatch) => {
 }
 
 // ---------------------------------------------------------------------------------
-// LOAD BALANCE
+// LOAD BALANCES
 export const loadBalance = async (token, account, dispatch) => {
   const balance = await token.balanceOf(account)
 
   dispatch(balanceLoaded(ethers.utils.formatUnits(balance.toString(), 'ether')))
+}
+
+export const loadDAOBalance = async (token, account, dispatch) => {
+  const daoBalance = await token.balanceOf(account)
+
+  dispatch(daoBalanceLoaded(ethers.utils.formatUnits(daoBalance.toString(), 'ether')))
 }
 
 // ---------------------------------------------------------------------------------
