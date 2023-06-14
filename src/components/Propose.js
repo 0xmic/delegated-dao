@@ -71,7 +71,7 @@ const Propose = () => {
         The DAO treasury must hold enough tokens to distribute to proposal recipient.
         <br />
         <br />
-        <strong>DAO Treasury:</strong> {parseInt(daoBalance).toLocaleString()} CT
+        <strong>DAO Treasury:</strong> {account ? `${parseInt(daoBalance).toLocaleString()} CT` : 'connect to network'}
       </p>
 
       <hr />
