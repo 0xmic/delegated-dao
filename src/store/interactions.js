@@ -28,7 +28,8 @@ import {
   undelegateSuccess,
   undelegateFail,
   votingPeriodHoursLoaded,
-  quorumLoaded
+  quorumLoaded,
+  proposalsLoaded
 } from './reducers/delegatedDAO'
 
 import TOKEN_ABI from '../abis/Token.json'
@@ -222,4 +223,22 @@ export const loadQuorum = async (delegatedDAO, dispatch) => {
   dispatch(quorumLoaded(quorumWithoutDecimals))
 
   return quorum
+}
+
+// ---------------------------------------------------------------------------------
+// LOAD PROPOSALS
+export const loadProposals = async (delegatedDAO, dispatch) => {
+  const proposalCountBN = await delegatedDAO.proposalCount()
+  const proposalCount = proposalCountBN.toNumber()
+
+  let proposals = []
+
+  for (var i = 1; i <= proposalCount; i++) {
+    const proposal = await delegatedDAO.proposals(i)
+    proposals.push(proposal)
+  }
+
+  dispatch(proposalsLoaded(proposals))
+
+  return proposals
 }

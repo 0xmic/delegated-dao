@@ -8,6 +8,7 @@ export const delegatedDAO = createSlice({
     delegatorBalance: 0,
     votingPeriodHours: 0,
     quorum: 0,
+    proposals: [],
     delegateeVotesReceived: 0,
     proposing: {
       isProposing: false,
@@ -40,6 +41,9 @@ export const delegatedDAO = createSlice({
     },
     quorumLoaded: (state, action) => {
       state.quorum = action.payload
+    },
+    proposalsLoaded: (state, action) => {
+      state.proposals = action.payload
     },
     delegateeVotesReceivedLoaded: (state, action) => {
       state.delegateeVotesReceived = action.payload
@@ -98,6 +102,7 @@ export const {
   delegatorBalanceLoaded,
   votingPeriodHoursLoaded,
   quorumLoaded,
+  proposalsLoaded,
   delegateeVotesReceivedLoaded,
   proposeRequest,
   proposeSuccess,

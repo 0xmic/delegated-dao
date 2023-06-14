@@ -34,7 +34,6 @@ const Delegate = () => {
   const isDelegating = useSelector(state => state.delegatedDAO.delegating.isDelegating)
   const isUndelegating = useSelector(state => state.delegatedDAO.undelegating.isUndelegating)
 
-  //-----------------------------------------------------------------------
   const delegateHandler = async (e) => {
     e.preventDefault()
 
@@ -63,8 +62,6 @@ const Delegate = () => {
       .catch(err => console.error(err));
   }
 
-  //--------------------------------------------------------------------------
-
   useEffect(() => {
     if (!isDelegating && !error) {
       setDelegate('')
@@ -87,6 +84,14 @@ const Delegate = () => {
         Delegators - DAO members who have delegated voting power to another DAO member - are unable to receive delegation.
         <br />
         Delegatees - DAO members who have received delegation - are unable to delegate the voting power they have accumulated.
+        <br />
+        <br />
+        {/* <strong>Your Votes:</strong> {
+          balance ? balance :
+          parseFloat(delegatorBalance) > 0 ? `${parseInt(delegatorBalance).toLocaleString()} delegated` :
+          account ? '0' :
+          'connect wallet'
+        } */}
       </p>
 
       <hr />

@@ -2,35 +2,20 @@ import { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import Table from 'react-bootstrap/Table'
 import Button from 'react-bootstrap/Button'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import Blockies from 'react-blockies'
+
+import { ethers } from 'ethers';
 
 const Vote = () => {
   const account = useSelector(state => state.provider.account)
   const votingPeriodHours = useSelector(state => state.delegatedDAO.votingPeriodHours)
   const quorum = useSelector(state => state.delegatedDAO.quorum)
-
-  const proposals = []
-  // > const proposals = useSelector(state => state.delegatedDAO.proposals)
-  // ... Redux portion ...
-  // Fetch proposals
-  // TODO:
-  //  const count = proposalCount
-  //  const items = []
-
-  //  for (var i = 0; i < count; i++) {
-  //    const proposal = await dao.proposals(i + 1)
-  //    items.push(proposal)
-  //  }
-
-
-
-  const dispatch = useDispatch()
+  const proposals = useSelector(state => state.delegatedDAO.proposals)
 
   useEffect(() => {
-    // Create a function to fetch live proposals
-    // dispatch(fetchLiveProposals())
-  }, [dispatch])
+  }, [])
 
-  // Table headings
   const headers = [
     '#',
     'Title',
@@ -44,6 +29,52 @@ const Vote = () => {
     'Finalize',
     'Deadline'
   ]
+
+  // Status mapping function
+  const mapStatus = status => {
+    const statusCode = Number(status);
+
+    switch(statusCode) {
+      case 0:
+        return 'Active';
+      case 1:
+        return 'Passed';
+      case 2:
+        return 'Failed';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  const upVoteHandler = async (e) => {
+    e.preventDefault()
+
+    // upVote(delegatedDAO, dispatch)
+    //   .then(() => {
+    //     window.location.reload();
+    //   })
+    //   .catch(err => console.error(err));
+  }
+
+  const downVoteHandler = async (e) => {
+    e.preventDefault()
+
+    // upVote(delegatedDAO, dispatch)
+    //   .then(() => {
+    //     window.location.reload();
+    //   })
+    //   .catch(err => console.error(err));
+  }
+
+  const finalizeHandler = async (e) => {
+    e.preventDefault()
+
+    // upVote(delegatedDAO, dispatch)
+    //   .then(() => {
+    //     window.location.reload();
+    //   })
+    //   .catch(err => console.error(err));
+  }
 
   return (
     <>
@@ -77,12 +108,73 @@ const Vote = () => {
           </tr>
         </thead>
         <tbody>
-          {/* TODO: Replace with actual proposal data once Redux is set up */}
           {proposals.map((proposal, index) => (
+
             <tr key={index}>
-              {/* TODO: Insert logic to render each cell */}
-              <td className='text-center'>{proposal.id}</td>
-              {/* TODO: Input rest of table cells */}
+              <td className='text-center'>
+                {proposal.id.toString()}
+              </td>
+              <td className='text-center'>
+                {proposal.title.toString()}
+              </td>
+              <td className='text-center'>
+                {proposal.description.toString()}
+              </td>
+              <td className='text-center'>
+                {parseInt(proposal.amount.toString()).toLocaleString()} CT
+              </td>
+              <td className='text-center'>
+                <Blockies
+                  seed={proposal.recipient.toString()}
+                  size={10}
+                  scale={3}
+                  color='#e6e6e6'
+                  bgColor='#000000'
+                  spotColor='#ffffff'
+                  className="identicon mx-2"
+                />
+                <OverlayTrigger
+                  overlay={
+                    <Tooltip id={`tooltip-${index}`}>
+                      {proposal.recipient.toString()}
+                    </Tooltip>
+                  }
+                >
+                  <span>
+                    {proposal.recipient.toString().slice(0, 6) + '...' + proposal.recipient.toString().slice(-4)}
+                  </span>
+                </OverlayTrigger>
+              </td>
+              <td className='text-center'>
+                {parseInt(ethers.utils.formatEther(proposal.votes).split(".")[0]).toLocaleString()}
+              </td>
+              <td className='text-center'>
+                {mapStatus(proposal.status)}
+              </td>
+              <td className='text-center'>
+                {/* TODO: Add button + Redux handler */}
+                {/* TODO: Change output depending on user: investor, non-investor */}
+                <Button variant='primary' style={{ width: '100%' }} onClick={() => upVoteHandler(proposal.id)}>
+                  👍
+                </Button>
+              </td>
+              <td className='text-center'>
+                {/* TODO: Add button + Redux handler */}
+                {/* TODO: Change output depending on user: investor, non-investor */}
+                <Button variant='primary' style={{ width: '100%' }} onClick={() => downVoteHandler(proposal.id)}>
+                👎
+                </Button>
+              </td>
+              <td className='text-center'>
+                {/* TODO: Add button + Redux handler */}
+                {/* TODO: Change output depending on user: investor, non-investor */}
+                <Button variant='primary' style={{ width: '100%' }} onClick={() => finalizeHandler(proposal.id)}>
+                    Finalize
+                  </Button>
+              </td>
+              <td className='text-center'>
+                {new Date(proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000).toLocaleString()}
+              </td>
             </tr>
           ))}
         </tbody>
