@@ -77,14 +77,16 @@ const Delegate = () => {
       <h1 className='text-center'>Delegate Votes</h1>
 
       <p className='text-center'>
-        DAO members may delegate their voting power to another DAO member if they so choose. Delegated votes can be undelegated at any time.
+        DAO members may delegate their voting power to another DAO member to vote on their behalf.
+        <br />
+        Delegated votes can be undelegated at any time.
         <br />
         <br />
         <strong>Delegation Requirements:</strong>
         <br />
-        DAO members who have received delegation (delegatees) are unable to delegate the voting power they have accumulated.
+        Delegators - DAO members who have delegated voting power to another DAO member - are unable to receive delegation.
         <br />
-        Additionally, if you have delegated your voting power to another DAO member, you are unable to receive delegation from other members.
+        Delegatees - DAO members who have received delegation - are unable to delegate the voting power they have accumulated.
       </p>
 
       <hr />

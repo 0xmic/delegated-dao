@@ -5,10 +5,21 @@ import Button from 'react-bootstrap/Button'
 
 const Vote = () => {
   // TODO: Create Redux slice/reducer for 'proposals' and 'account' in Redux store
-  // const proposals = useSelector(state => state.delegatedDAO.proposals)
-  // const account = useSelector(state => state.provider.account)
+
   const proposals = []
-  const account = ''
+  // > const proposals = useSelector(state => state.delegatedDAO.proposals)
+  // ... Redux portion ...
+  // Fetch proposals
+  // TODO:
+  //  const count = proposalCount
+  //  const items = []
+
+  //  for (var i = 0; i < count; i++) {
+  //    const proposal = await dao.proposals(i + 1)
+  //    items.push(proposal)
+  //  }
+
+  const account = useSelector(state => state.provider.account)
 
   const dispatch = useDispatch()
 
@@ -37,9 +48,9 @@ const Vote = () => {
       <p className='text-center'>
         Below are all proposals that are currently up for voting.
         <br />
-        As a DAO member, you can express your support or opposition to each proposal by 'Upvoting' or 'Downvoting',
+        DAO members can express support or opposition for a proposal by 'Upvoting' or 'Downvoting',
         <br />
-        where each vote is weighted by your voting power (i.e. the number of tokens you hold).
+        where each vote is weighted by a member's voting power (i.e. the number of tokens you hold).
       </p>
 
       <hr />

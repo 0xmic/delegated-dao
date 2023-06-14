@@ -16,7 +16,7 @@ const Delegatees = () => {
       <h2 className='my-4 text-center'>Current Delegates</h2>
 
       <p className='text-center'>
-        Below is a list of all current DAO members who have received delegation from other members.
+        Below are all DAO members who have received delegation from other members.
 
         <br />
 

@@ -60,7 +60,7 @@ const Propose = () => {
       <h1 className='text-center'>Create Proposal</h1>
 
       <p className='text-center'>
-        Create a new proposal to be voted on by the DAO.
+        DAO members can create new proposals to be voted on by the DAO.
       </p>
 
       <hr />
