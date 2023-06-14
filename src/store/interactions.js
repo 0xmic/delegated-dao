@@ -26,7 +26,9 @@ import {
   delegateFail,
   undelegateRequest,
   undelegateSuccess,
-  undelegateFail
+  undelegateFail,
+  votingPeriodHoursLoaded,
+  quorumLoaded
 } from './reducers/delegatedDAO'
 
 import TOKEN_ABI from '../abis/Token.json'
@@ -82,13 +84,25 @@ export const loadDelegatedDAO = async (provider, chainId, dispatch) => {
 export const loadBalance = async (token, account, dispatch) => {
   const balance = await token.balanceOf(account)
 
-  dispatch(balanceLoaded(ethers.utils.formatUnits(balance.toString(), 'ether')))
+  // Convert the BigNumber balance to a string only after all calculations have been performed.
+  const balanceFormatted = ethers.utils.formatUnits(balance, 18)
+
+  // Parse the number and round to nearest whole number to avoid decimals, then convert it back to a string.
+  const balanceWithoutDecimals = Math.round(parseFloat(balanceFormatted)).toString()
+
+  dispatch(daoBalanceLoaded(balanceWithoutDecimals))
 }
 
 export const loadDAOBalance = async (token, account, dispatch) => {
   const daoBalance = await token.balanceOf(account)
 
-  dispatch(daoBalanceLoaded(ethers.utils.formatUnits(daoBalance.toString(), 'ether')))
+  // Convert the BigNumber balance to a string only after all calculations have been performed.
+  const daoBalanceFormatted = ethers.utils.formatUnits(daoBalance, 18)
+
+  // Parse the number and round to nearest whole number to avoid decimals, then convert it back to a string.
+  const daoBalanceWithoutDecimals = Math.round(parseFloat(daoBalanceFormatted)).toString()
+
+  dispatch(daoBalanceLoaded(daoBalanceWithoutDecimals))
 }
 
 // ---------------------------------------------------------------------------------
@@ -182,4 +196,30 @@ export const undelegateVotes = async (provider, delegatedDAO, dispatch) => {
   } catch (error) {
     dispatch(undelegateFail())
   }
+}
+
+// ---------------------------------------------------------------------------------
+// LOAD DAO VOTING PERIOD HOURS
+export const loadVotingPeriodHours = async (delegatedDAO, dispatch) => {
+  const votingPeriodHours = await delegatedDAO.votingPeriodHours()
+
+  dispatch(votingPeriodHoursLoaded(votingPeriodHours.toNumber()))
+
+  return votingPeriodHours
+}
+
+// ---------------------------------------------------------------------------------
+// LOAD DAO QUORUM
+export const loadQuorum = async (delegatedDAO, dispatch) => {
+  const quorum = await delegatedDAO.quorum()
+
+  // Assumes token has 18 decimal places
+  const quorumFormatted = ethers.utils.formatUnits(quorum, 18)
+
+  // Parse the number, floor it to remove decimals, then convert it back to a string.
+  const quorumWithoutDecimals = Math.floor(parseFloat(quorumFormatted)).toString()
+
+  dispatch(quorumLoaded(quorumWithoutDecimals))
+
+  return quorum
 }
