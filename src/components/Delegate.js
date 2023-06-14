@@ -86,12 +86,12 @@ const Delegate = () => {
         Delegatees - DAO members who have received delegation - are unable to delegate the voting power they have accumulated.
         <br />
         <br />
-        {/* <strong>Your Votes:</strong> {
-          balance ? balance :
-          parseFloat(delegatorBalance) > 0 ? `${parseInt(delegatorBalance).toLocaleString()} delegated` :
+        <strong>Your Votes:</strong> {
+          parseFloat(balance) > 0 ? parseFloat(balance).toLocaleString() :
+          parseFloat(delegatorBalance) > 0 ? `${parseFloat(delegatorBalance).toLocaleString()} Delegated` :
           account ? '0' :
           'connect wallet'
-        } */}
+        }
       </p>
 
       <hr />
