@@ -91,19 +91,23 @@ export const loadBalance = async (token, account, dispatch) => {
   // Parse the number and round to nearest whole number to avoid decimals, then convert it back to a string.
   const balanceWithoutDecimals = Math.round(parseFloat(balanceFormatted)).toString()
 
-  dispatch(daoBalanceLoaded(balanceWithoutDecimals))
+  dispatch(balanceLoaded(balanceWithoutDecimals))
 }
 
-export const loadDAOBalance = async (token, account, dispatch) => {
-  const daoBalance = await token.balanceOf(account)
+export const loadDAOBalance = async (token, delegatedDAO, account, dispatch) => {
+  const daoBalance = await token.balanceOf(account);
+  const totalTokensDelegated = await delegatedDAO.totalTokensDelegated();
+
+  // Subtract the total tokens delegated from the DAO balance
+  const daoBalanceWithoutDelegations = daoBalance.sub(totalTokensDelegated);
 
   // Convert the BigNumber balance to a string only after all calculations have been performed.
-  const daoBalanceFormatted = ethers.utils.formatUnits(daoBalance, 18)
+  const daoBalanceFormatted = ethers.utils.formatUnits(daoBalanceWithoutDelegations, 18);
 
   // Parse the number and round to nearest whole number to avoid decimals, then convert it back to a string.
-  const daoBalanceWithoutDecimals = Math.round(parseFloat(daoBalanceFormatted)).toString()
+  const daoBalanceWithoutDecimals = Math.round(parseFloat(daoBalanceFormatted)).toString();
 
-  dispatch(daoBalanceLoaded(daoBalanceWithoutDecimals))
+  dispatch(daoBalanceLoaded(daoBalanceWithoutDecimals));
 }
 
 // ---------------------------------------------------------------------------------

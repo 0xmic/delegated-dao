@@ -31,7 +31,7 @@ const Navigation = () => {
   const connectHandler = async () => {
     const account = await loadAccount(dispatch)
     const balance = await loadBalance(token, account, dispatch)
-    const daoBalance = await loadDAOBalance(token, delegatedDAO.address, dispatch)
+    const daoBalance = await loadDAOBalance(token, delegatedDAO, delegatedDAO.address, dispatch)
     const delegatorDelegatee = await loadDelegatorDelegatee(delegatedDAO, account, dispatch)
     const delegatorBalance = await loadDelegatorBalance(delegatedDAO, account, dispatch)
     const delegateeVotesReceived = await loadDelegateeVotesReceived(delegatedDAO, account, dispatch)

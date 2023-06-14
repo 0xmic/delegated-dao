@@ -11,6 +11,7 @@ contract DelegatedDAO {
     address owner;
     Token public token;
     uint256 public quorum;
+    uint256 public totalTokensDelegated;
     uint256 public votingPeriodHours;
 
     enum ProposalStatus { Active, Passed, Failed }
@@ -145,6 +146,9 @@ contract DelegatedDAO {
         require(token.transferFrom(msg.sender, address(this), amount), "Transfer failed");
         delegatorBalance[msg.sender] = amount;
 
+        // Update Total Tokens Delegated
+        totalTokensDelegated += amount;
+
         // Delegate votes
         delegateeDelegatorCount[_delegatee]++;
         delegateeDelegators[_delegatee][delegateeDelegatorCount[_delegatee]] = msg.sender;
@@ -178,6 +182,9 @@ contract DelegatedDAO {
         uint256 amount = delegatorBalance[msg.sender];
         require(token.transfer(msg.sender, amount), "Transfer failed");
         delegatorBalance[msg.sender] = 0;
+
+        // Update Total Tokens Delegated
+        totalTokensDelegated -= amount;
 
         // Remove delegator's votes from delegateeVotesReceived
         address removedDelegatee = delegatorDelegatee[msg.sender];

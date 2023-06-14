@@ -169,6 +169,10 @@ describe('Delegated DAO', () => {
     })
 
     describe('Success', () => {
+      it('updates totalTokensDelegated', async () => {
+        expect(await delegatedDAO.totalTokensDelegated()).to.equal(600000)
+      })
+
       it('updates delegatorBalance', async () => {
         expect(await delegatedDAO.delegatorBalance(investor1.address)).to.equal(100000)
         expect(await delegatedDAO.delegatorBalance(investor2.address)).to.equal(100000)
@@ -221,7 +225,7 @@ describe('Delegated DAO', () => {
         expect(await delegatedDAO.delegateeVotesReceived(investorDelegate3.address)).to.equal(100000)
       })
 
-      it('updates deelgatee votes on live proposals', async () => {
+      it('updates delgatee votes on live proposals', async () => {
         transaction = await delegatedDAO
           .connect(investor1)
           .createProposal('Proposal 1', 'Description 1', 10000, recipient.address)
@@ -331,6 +335,10 @@ describe('Delegated DAO', () => {
     })
 
     describe('Success', () => {
+      it('updates totalTokensDelegated', async () => {
+        expect(await delegatedDAO.totalTokensDelegated()).to.equal(0)
+      })
+
       it('updates delegatorBalance', async () => {
         expect(await delegatedDAO.delegatorBalance(investor1.address)).to.equal(0)
       })
