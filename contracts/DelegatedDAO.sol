@@ -102,7 +102,7 @@ contract DelegatedDAO {
         uint256 _amount,
         address payable _recipient
     ) external onlyInvestor {
-        require(token.balanceOf(address(this)) >= _amount, "Not enough funds");
+        require(token.balanceOf(address(this)) - totalTokensDelegated >= _amount, "Not enough funds");
 
         proposalCount++;
 
@@ -299,7 +299,7 @@ contract DelegatedDAO {
         }
 
         require(proposal.votes >= int(quorum) && proposal.votes > 0, "Not enough votes");
-        require(token.balanceOf(address(this)) >= proposal.amount, "Not enough funds");
+        require(token.balanceOf(address(this)) - totalTokensDelegated >= proposal.amount, "Not enough funds");
 
         require(token.transfer(proposal.recipient, proposal.amount), "Transfer failed");
         proposal.status = ProposalStatus.Passed;

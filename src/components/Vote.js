@@ -9,6 +9,9 @@ import { ethers } from 'ethers';
 
 const Vote = () => {
   const account = useSelector(state => state.provider.account)
+  const balance = useSelector(state => state.token.balance)
+  const delegatorBalance = useSelector(state => state.delegatedDAO.delegatorBalance)
+  const delegateeVotesReceived = useSelector(state => state.delegatedDAO.delegateeVotesReceived)
   const votingPeriodHours = useSelector(state => state.delegatedDAO.votingPeriodHours)
   const quorum = useSelector(state => state.delegatedDAO.quorum)
   const proposals = useSelector(state => state.delegatedDAO.proposals)
@@ -92,9 +95,19 @@ const Vote = () => {
         The voting period begins upon proposal creation, and is hard coded upon DAO creation.
         <br />
         <br />
-        <strong>Voting Period:</strong> {account ? `${parseInt(votingPeriodHours).toLocaleString()} hours` : 'connect to network'}
+        <strong>Voting Period:</strong> {account ? `${parseInt(votingPeriodHours).toLocaleString()} hours` : 'connect wallet'}
         <br />
-        <strong>Quorum:</strong> {account ? `${parseInt(quorum).toLocaleString()} votes` : 'connect to network'}
+        <strong>Quorum:</strong> {account ? `${parseInt(quorum).toLocaleString()} votes` : 'connect wallet'}
+        <br />
+        <br />
+        {/* TODO: Update to add delegated voting power for delegatees */}
+        <strong>Your Voting Power:</strong> {
+          parseFloat(delegateeVotesReceived) > 0 ? (parseFloat(delegateeVotesReceived) + parseFloat(balance)).toLocaleString() :
+          parseFloat(balance) > 0 ? parseFloat(balance).toLocaleString() :
+          parseFloat(delegatorBalance) > 0 ? `${parseFloat(delegatorBalance).toLocaleString()} Delegated` :
+          account ? '0' :
+          'connect wallet'
+        }
       </p>
 
       <hr />
@@ -169,7 +182,7 @@ const Vote = () => {
                 {/* TODO: Add button + Redux handler */}
                 {/* TODO: Change output depending on user: investor, non-investor */}
                 <Button variant='primary' style={{ width: '100%' }} onClick={() => finalizeHandler(proposal.id)}>
-                    Finalize
+                    ⚖️
                   </Button>
               </td>
               <td className='text-center'>

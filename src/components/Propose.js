@@ -72,7 +72,7 @@ const Propose = () => {
         <br />
         <br />
         {/* TODO: Update to subtract tokens sent to DAO for delegation. Need to fix in interactions file */}
-        <strong>DAO Treasury:</strong> {account ? `${parseInt(daoBalance).toLocaleString()} CT` : 'connect to network'}
+        <strong>DAO Treasury:</strong> {account ? `${parseInt(daoBalance).toLocaleString()} CT` : 'connect wallet'}
       </p>
 
       <hr />
