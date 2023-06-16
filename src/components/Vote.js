@@ -1,11 +1,13 @@
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import Table from 'react-bootstrap/Table'
 import Button from 'react-bootstrap/Button'
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import Blockies from 'react-blockies'
 
-import { ethers } from 'ethers';
+import { ethers } from 'ethers'
+
+import Alert from './Alert'
 
 import {
   upVote,
@@ -15,6 +17,8 @@ import {
 
 const Vote = () => {
   const dispatch = useDispatch()
+
+  const [showAlert, setShowAlert] = useState(false)
 
   const provider = useSelector(state => state.provider.connection)
   const account = useSelector(state => state.provider.account)
@@ -26,6 +30,16 @@ const Vote = () => {
   const quorum = useSelector(state => state.delegatedDAO.quorum)
   const proposals = useSelector(state => state.delegatedDAO.proposals)
   const userVotes = useSelector(state => state.delegatedDAO.userVotes)
+
+  const isUpVoting = useSelector(state => state.delegatedDAO.upVoting.isUpVoting)
+  const isUpVotingSuccess = useSelector(state => state.delegatedDAO.upVoting.isSuccess)
+  const isUpVotingTxnHash = useSelector(state => state.delegatedDAO.upVoting.transationHash)
+  const isDownVoting = useSelector(state => state.delegatedDAO.downVoting.isDownVoting)
+  const isDownVotingSuccess = useSelector(state => state.delegatedDAO.downVoting.isSuccess)
+  const isDownVotingTxnHash = useSelector(state => state.delegatedDAO.downVoting.transactionHash)
+  const isFinalizing = useSelector(state => state.delegatedDAO.finalizing.isFinalizing)
+  const isFinalizingSuccess = useSelector(state => state.delegatedDAO.finalizing.isSuccess)
+  const isFinalizingTxnHash = useSelector(state => state.delegatedDAO.finalizing.transactionHash)
 
   useEffect(() => {
   }, [])
@@ -63,32 +77,48 @@ const Vote = () => {
   const upVoteHandler = async (e, id) => {
     e.preventDefault()
 
-    upVote(provider, delegatedDAO, id, dispatch)
-      .then(() => {
-        window.location.reload();
-      })
-      .catch(err => console.error(err));
+    setShowAlert(false)
+
+    const success = await upVote(provider, delegatedDAO, id, dispatch)
+
+    if (success) {
+      window.location.reload()
+    }
+
+    setShowAlert(true)
   }
 
   const downVoteHandler = async (e, id) => {
     e.preventDefault()
 
-    downVote(provider, delegatedDAO, id, dispatch)
-      .then(() => {
-        window.location.reload();
-      })
-      .catch(err => console.error(err));
+    setShowAlert(false)
+
+    const success = await downVote(provider, delegatedDAO, id, dispatch)
+
+    if (success) {
+      window.location.reload()
+    }
+
+    setShowAlert(true)
   }
 
   const finalizeHandler = async (e, id) => {
     e.preventDefault()
 
-    finalizeProposal(provider, delegatedDAO, id, dispatch)
-      .then(() => {
-        window.location.reload();
-      })
-      .catch(err => console.error(err));
+    setShowAlert(false)
+
+    const success = await finalizeProposal(provider, delegatedDAO, id, dispatch)
+
+    if (success) {
+      window.location.reload()
+    }
+
+    setShowAlert(true)
   }
+
+  // Timestamp is in seconds, so convert it to milliseconds for JS
+  const isExpired = proposal =>
+    Date.now() > proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000
 
   return (
     <>
@@ -176,7 +206,7 @@ const Vote = () => {
                 {parseInt(ethers.utils.formatEther(proposal.votes).split(".")[0]).toLocaleString()}
               </td>
               <td className='text-center align-middle'>
-                {mapStatus(proposal.status)}
+                {isExpired(proposal) && Number(proposal.status) === 0 ? 'Expired' : mapStatus(proposal.status)}
               </td>
               <td className='text-center align-middle'>
                 {!isFinalized && canVote && !userVotes[proposal.id] &&
@@ -217,6 +247,31 @@ const Vote = () => {
           })}
         </tbody>
       </Table>
+
+      {isUpVoting || isDownVoting || isFinalizing ? (
+        <Alert
+          message={'Transaction Pending...'}
+          transactionHash={null}
+          variant={'info'}
+          setShowAlert={setShowAlert}
+        />
+      ) : (isUpVotingSuccess || isDownVotingSuccess || isFinalizingSuccess) && showAlert ? (
+        <Alert
+          message={'Transaction Successful...'}
+          transactionHash={isUpVotingSuccess ? isUpVotingTxnHash : isDownVotingSuccess ? isDownVotingTxnHash : isFinalizingTxnHash}
+          variant={'success'}
+          setShowAlert={setShowAlert}
+        />
+      ) : (!isUpVotingSuccess || !isDownVotingSuccess || !isFinalizingSuccess) && showAlert ? (
+        <Alert
+          message={'Transaction Failed...'}
+          transactionHash={null}
+          variant={'danger'}
+          setShowAlert={setShowAlert}
+        />
+      ) : (
+        <></>
+      )}
     </>
   )
 }

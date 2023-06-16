@@ -144,7 +144,7 @@ export const delegatedDAO = createSlice({
       state.downVoting.transactionHash = null
     },
     finalizeProposalRequest: (state, action) => {
-      state.finalizing.isFinalizing = false
+      state.finalizing.isFinalizing = true
       state.finalizing.isSuccess = false
       state.finalizing.transactionHash = null
     },

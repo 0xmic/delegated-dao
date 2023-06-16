@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux';
-import Card from 'react-bootstrap/Card';
+import { useSelector, useDispatch } from 'react-redux'
+import Card from 'react-bootstrap/Card'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import Spinner from 'react-bootstrap/Spinner'
 
 import { ethers } from 'ethers'
+
+import Alert from './Alert'
 
 import {
   createProposal
@@ -20,11 +22,15 @@ const Propose = () => {
 
   const [formKey, setFormKey] = useState(Math.random());
 
+  const [showAlert, setShowAlert] = useState(false)
+
   const provider = useSelector(state => state.provider.connection)
 
   const account = useSelector(state => state.provider.account)
   const delegatedDAO = useSelector(state => state.delegatedDAO.contract)
   const isProposing = useSelector(state => state.delegatedDAO.proposing.isProposing)
+  const isProposingSuccess = useSelector(state => state.delegatedDAO.proposing.isSuccess)
+  const isProposingTxnHash = useSelector(state => state.delegatedDAO.proposing.transactionHash)
 
   const dispatch = useDispatch()
 
@@ -35,6 +41,8 @@ const Propose = () => {
   const proposeHandler = async (e) => {
     e.preventDefault()
 
+    setShowAlert(false)
+
     if (!ethers.utils.isAddress(recipient)) {
       setError('Invalid Ethereum address')
       return
@@ -44,6 +52,8 @@ const Propose = () => {
     setError('')
 
     createProposal(provider, delegatedDAO, title, description, amount, recipient, dispatch)
+
+    setShowAlert(true)
   }
 
   useEffect(() => {
@@ -145,6 +155,32 @@ const Propose = () => {
           </p>
         )}
       </Card>
+
+      {isProposing ? (
+        <Alert
+          message={'Proposal Pending...'}
+          transactionHash={null}
+          variant={'info'}
+          setShowAlert={setShowAlert}
+        />
+      ) : isProposingSuccess && showAlert ? (
+        <Alert
+          message={'Proposal Successful...'}
+          transactionHash={isProposingTxnHash}
+          variant={'success'}
+          setShowAlert={setShowAlert}
+        />
+      ) : !isProposingSuccess && showAlert ? (
+        <Alert
+          message={'Proposal Failed...'}
+          transactionHash={null}
+          variant={'danger'}
+          setShowAlert={setShowAlert}
+        />
+      ) : (
+        <></>
+      )}
+
     </>
   )
 }

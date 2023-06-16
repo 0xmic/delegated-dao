@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux';
-import Card from 'react-bootstrap/Card';
+import { useSelector, useDispatch } from 'react-redux'
+import Card from 'react-bootstrap/Card'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import Spinner from 'react-bootstrap/Spinner'
@@ -8,6 +8,8 @@ import Table from 'react-bootstrap/Table'
 import Blockies from 'react-blockies'
 
 import { ethers } from 'ethers'
+
+import Alert from './Alert'
 
 import {
   delegateVotes,
@@ -19,6 +21,8 @@ const Delegate = () => {
   const [error, setError] = useState('')
 
   const [formKey, setFormKey] = useState(Math.random());
+
+  const [showAlert, setShowAlert] = useState(false)
 
   const dispatch = useDispatch()
 
@@ -32,34 +36,44 @@ const Delegate = () => {
   const delegateeVotesReceived = useSelector(state => state.delegatedDAO.delegateeVotesReceived)
 
   const isDelegating = useSelector(state => state.delegatedDAO.delegating.isDelegating)
+  const isDelegatingSuccess = useSelector(state => state.delegatedDAO.delegating.isSuccess)
+  const isDelegatingTxnHash = useSelector(state => state.delegatedDAO.delegating.transationHash)
   const isUndelegating = useSelector(state => state.delegatedDAO.undelegating.isUndelegating)
+  const isUndelegatingSuccess = useSelector(state => state.delegatedDAO.undelegating.isSuccess)
+  const isUndelegatingTxnHash = useSelector(state => state.delegatedDAO.undelegating.transactionHash)
 
   const delegateHandler = async (e) => {
     e.preventDefault()
+    setShowAlert(false)
 
     if (!ethers.utils.isAddress(delegate)) {
       setError('Invalid Ethereum address')
       return
     }
 
-    // reset error message when the address is valid
     setError('')
 
-    delegateVotes(provider, token, balance, delegatedDAO, delegate, dispatch)
-      .then(() => {
-        window.location.reload();
-      })
-      .catch(err => console.error(err));
+    const success = await delegateVotes(provider, token, balance, delegatedDAO, delegate, dispatch)
+
+    if (success) {
+      window.location.reload()
+    }
+
+    setShowAlert(true)
   }
 
   const undelegateHandler = async (e) => {
     e.preventDefault()
 
-    undelegateVotes(provider, delegatedDAO, dispatch)
-      .then(() => {
-        window.location.reload();
-      })
-      .catch(err => console.error(err));
+    setShowAlert(false)
+
+    const success = await undelegateVotes(provider, delegatedDAO, dispatch)
+
+    if (success) {
+      window.location.reload()
+    }
+
+    setShowAlert(true)
   }
 
   useEffect(() => {
@@ -67,7 +81,7 @@ const Delegate = () => {
       setDelegate('')
       setFormKey(Math.random());
     }
-  }, [isDelegating, isUndelegating, error])
+  }, [isDelegating, error])
 
   return (
     <>
@@ -222,6 +236,31 @@ const Delegate = () => {
             </p>
           </Card>
         </>
+      )}
+
+      {isDelegating || isUndelegating ? (
+        <Alert
+          message={'Transaction Pending...'}
+          transactionHash={null}
+          variant={'info'}
+          setShowAlert={setShowAlert}
+        />
+      ) : (isDelegatingSuccess || isUndelegatingSuccess) && showAlert ? (
+        <Alert
+          message={'Transaction Successful...'}
+          transactionHash={isDelegatingSuccess ? isDelegatingTxnHash : isUndelegatingTxnHash}
+          variant={'success'}
+          setShowAlert={setShowAlert}
+        />
+      ) : (!isDelegatingSuccess || !isUndelegatingSuccess) && showAlert ? (
+        <Alert
+          message={'Transaction Failed...'}
+          transactionHash={null}
+          variant={'danger'}
+          setShowAlert={setShowAlert}
+        />
+      ) : (
+        <></>
       )}
     </>
   )

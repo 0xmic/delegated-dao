@@ -177,20 +177,23 @@ export const delegateVotes = async (provider, token, balance, delegatedDAO, dele
   try {
     dispatch(delegateRequest())
 
-    let transaction
-
     const signer = await provider.getSigner()
 
-    transaction = await token.connect(signer).approve(delegatedDAO.address, tokens(balance))
-    await transaction.wait()
-
+    let transaction = await token.connect(signer).approve(delegatedDAO.address, tokens(balance))
+    let receipt = await transaction.wait()
     transaction = await delegatedDAO.connect(signer).delegate(delegate)
-    await transaction.wait()
+    receipt = await transaction.wait()
 
-    dispatch(delegateSuccess(transaction.hash))
-
+    if (receipt.status === 1) {
+      dispatch(delegateSuccess(transaction.hash))
+      return true
+    } else {
+      dispatch(delegateFail())
+      return false
+    }
   } catch (error) {
     dispatch(delegateFail())
+    return false
   }
 }
 
@@ -200,17 +203,20 @@ export const undelegateVotes = async (provider, delegatedDAO, dispatch) => {
   try {
     dispatch(undelegateRequest())
 
-    let transaction
-
     const signer = await provider.getSigner()
+    const transaction = await delegatedDAO.connect(signer).undelegate()
+    const receipt = await transaction.wait()
 
-    transaction = await delegatedDAO.connect(signer).undelegate()
-    await transaction.wait()
-
-    dispatch(undelegateSuccess(transaction.hash))
-
+    if (receipt.status === 1) {
+      dispatch(undelegateSuccess(transaction.hash))
+      return true
+    } else {
+      dispatch(undelegateFail())
+      return false
+    }
   } catch (error) {
     dispatch(undelegateFail())
+    return false
   }
 }
 
@@ -264,17 +270,21 @@ export const upVote = async (provider, delegatedDAO, id, dispatch) => {
   try {
     dispatch(upVoteRequest())
 
-    let transaction
-
     const signer = await provider.getSigner()
 
-    transaction = await delegatedDAO.connect(signer).upVote(id)
-    await transaction.wait()
+    const transaction = await delegatedDAO.connect(signer).upVote(id)
+    const receipt = await transaction.wait()
 
-    dispatch(upVoteSuccess(transaction.hash))
-
+    if (receipt.status === 1) {
+      dispatch(upVoteSuccess(transaction.hash))
+      return true
+    } else {
+      dispatch(upVoteFail())
+      return false
+    }
   } catch (error) {
     dispatch(upVoteFail())
+    return false
   }
 }
 
@@ -282,17 +292,21 @@ export const downVote = async (provider, delegatedDAO, id, dispatch) => {
   try {
     dispatch(downVoteRequest())
 
-    let transaction
-
     const signer = await provider.getSigner()
 
-    transaction = await delegatedDAO.connect(signer).downVote(id)
-    await transaction.wait()
+    const transaction = await delegatedDAO.connect(signer).downVote(id)
+    const receipt = await transaction.wait()
 
-    dispatch(downVoteSuccess(transaction.hash))
-
+    if (receipt.status === 1) {
+      dispatch(downVoteSuccess(transaction.hash))
+      return true
+    } else {
+      dispatch(downVoteFail())
+      return false
+    }
   } catch (error) {
     dispatch(downVoteFail())
+    return false
   }
 }
 
@@ -300,17 +314,21 @@ export const finalizeProposal = async (provider, delegatedDAO, id, dispatch) => 
   try {
     dispatch(finalizeProposalRequest())
 
-    let transaction
-
     const signer = await provider.getSigner()
 
-    transaction = await delegatedDAO.connect(signer).finalizeProposal(id)
-    await transaction.wait()
+    const transaction = await delegatedDAO.connect(signer).finalizeProposal(id)
+    const receipt = await transaction.wait()
 
-    dispatch(finalizeProposalSuccess(transaction.hash))
-
+    if (receipt.status === 1) {
+      dispatch(finalizeProposalSuccess(transaction.hash))
+      return true
+    } else {
+      dispatch(finalizeProposalFail())
+      return false
+    }
   } catch (error) {
     dispatch(finalizeProposalFail())
+    return false
   }
 }
 
