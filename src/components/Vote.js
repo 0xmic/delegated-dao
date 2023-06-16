@@ -131,26 +131,26 @@ const Vote = () => {
           </tr>
         </thead>
         <tbody>
-          {proposals.map((proposal, index) => {
+          {proposals.filter(proposal => Number(proposal.status) === 0).map((proposal, index) => {
             const isFinalized = proposal.status === 0 ? 0 : 1
             const canVote = parseFloat(delegateeVotesReceived) > 0 || parseFloat(balance) > 0
             const canFinalize = parseFloat(delegateeVotesReceived) > 0 || parseFloat(balance) > 0 || parseFloat(delegatorBalance) > 0
 
             return (
               <tr key={index}>
-              <td className='text-center'>
+              <td className='text-center align-middle'>
                 {proposal.id.toString()}
               </td>
-              <td className='text-center'>
+              <td className='text-center align-middle'>
                 {proposal.title.toString()}
               </td>
-              <td className='text-center'>
+              <td className='text-center align-middle'>
                 {proposal.description.toString()}
               </td>
-              <td className='text-center'>
+              <td className='text-center align-middle'>
                 {parseInt(proposal.amount.toString()).toLocaleString()} CT
               </td>
-              <td className='text-center'>
+              <td className='align-middle'>
                 <Blockies
                   seed={proposal.recipient.toString()}
                   size={10}
@@ -172,27 +172,27 @@ const Vote = () => {
                   </span>
                 </OverlayTrigger>
               </td>
-              <td className='text-center'>
+              <td className='text-center align-middle'>
                 {parseInt(ethers.utils.formatEther(proposal.votes).split(".")[0]).toLocaleString()}
               </td>
-              <td className='text-center'>
+              <td className='text-center align-middle'>
                 {mapStatus(proposal.status)}
               </td>
-              <td className='text-center'>
+              <td className='text-center align-middle'>
                 {!isFinalized && canVote && !userVotes[proposal.id] && (
                   <Button variant='primary' style={{ width: '100%' }} onClick={(e) => upVoteHandler(e, proposal.id)}>
                     👍
                   </Button>
                 )}
               </td>
-              <td className='text-center'>
+              <td className='text-center align-middle'>
                 {!isFinalized && canVote && !userVotes[proposal.id] && (
                   <Button variant='primary' style={{ width: '100%' }} onClick={(e) => downVoteHandler(e, proposal.id)}>
                     👎
                   </Button>
                 )}
               </td>
-              <td className='text-center'>
+              <td className='text-center align-middle'>
                 {!isFinalized && (canVote || parseFloat(delegatorBalance) > 0) && canFinalize &&
                 parseFloat(ethers.utils.formatUnits(proposal.votes, 18).toString()) >=  quorum &&
                 (
@@ -201,7 +201,7 @@ const Vote = () => {
                   </Button>
                 )}
               </td>
-              <td className='text-center'>
+              <td className='text-center align-middle'>
                 {new Date(proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000).toLocaleString()}
               </td>
             </tr>
