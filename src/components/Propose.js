@@ -109,7 +109,7 @@ const Propose = () => {
               />
               <Form.Control
                 type='number'
-                placeholder='Enter amount'
+                placeholder='Enter token amount (without decimals)'
                 className='my-2'
                 min={0}
                 onChange={(e) => {

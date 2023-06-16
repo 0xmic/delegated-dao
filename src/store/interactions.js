@@ -161,7 +161,9 @@ export const createProposal = async (provider, delegatedDAO, title, description,
 
     const signer = await provider.getSigner()
 
-    transaction = await delegatedDAO.connect(signer).createProposal(title, description, amount, recipient)
+    const parsedAmount = ethers.utils.parseUnits(amount.toString(), 18);
+
+    transaction = await delegatedDAO.connect(signer).createProposal(title, description, parsedAmount, recipient)
     await transaction.wait()
 
     dispatch(proposeSuccess(transaction.hash))

@@ -72,7 +72,7 @@ const History = () => {
                 {proposal.description.toString()}
               </td>
               <td className='text-center align-middle'>
-                {parseInt(proposal.amount.toString()).toLocaleString()} CT
+                {parseInt(ethers.utils.formatUnits(proposal.amount, 18).split('.')[0]).toLocaleString()} CT
               </td>
               <td className='d-flex align-items-center justify-content-center'>
                 <Blockies
