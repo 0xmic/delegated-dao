@@ -16,13 +16,15 @@ import {
   loadVotingPeriodHours,
   loadQuorum,
   loadProposals,
-  loadUserVotes
+  loadUserVotes,
+  loadDelegatees
 } from '../store/interactions'
 
 import config from '../config.json'
 
 const Navigation = () => {
   const chainId = useSelector(state => state.provider.chainId)
+  const provider = useSelector(state => state.provider.connection)
   const account = useSelector(state => state.provider.account)
   const token = useSelector(state => state.token.contract)
   const delegatedDAO = useSelector(state => state.delegatedDAO.contract)
@@ -40,6 +42,7 @@ const Navigation = () => {
     const quorum = await loadQuorum(delegatedDAO, dispatch)
     const proposals = await loadProposals(delegatedDAO, dispatch)
     const userVotes = await loadUserVotes(delegatedDAO, account, dispatch)
+    const delegatees = await loadDelegatees(provider, delegatedDAO, dispatch)
   }
 
   const networkHandler = async (e) => {

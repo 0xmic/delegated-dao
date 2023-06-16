@@ -1,9 +1,9 @@
+import { useSelector } from 'react-redux'
 import Table from 'react-bootstrap/Table'
-
-import { ethers } from 'ethers'
+import Blockies from 'react-blockies'
 
 const Delegatees = () => {
-  const delegates = []
+  const delegatees = useSelector(state => state.delegatedDAO.delegatees)
 
   // Table headings
   const headers = [
@@ -34,12 +34,21 @@ const Delegatees = () => {
         </tr>
       </thead>
       <tbody>
-        {/* TODO: Replace with actual proposal data once Redux is set up */}
-        {delegates.map((proposal, index) => (
+        {[...delegatees].sort((a, b) => parseFloat(b.votes) - parseFloat(a.votes)).map((delegatee, index) => (
           <tr key={index}>
-            {/* TODO: Insert logic to render each cell */}
-            <td className='text-center'>{proposal.id}</td>
-            {/* TODO: Input rest of table cells */}
+            <td className='d-flex align-items-center justify-content-center'>
+              <Blockies
+                  seed={delegatee.delegatee}
+                  size={10}
+                  scale={3}
+                  color='#e6e6e6'
+                  bgColor='#000000'
+                  spotColor='#ffffff'
+                  className="identicon mx-2"
+                />
+              {delegatee.delegatee}
+            </td>
+            <td className='text-center'>{delegatee.votes.toLocaleString()}</td>
           </tr>
         ))}
       </tbody>

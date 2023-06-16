@@ -10,7 +10,7 @@ async function main() {
   const MAX_SUPPLY = 2000000
   const decimals = 18
   const quorum = 0.25
-  const votingPeriodHours = 72
+  const votingPeriodHours = 1
 
   // Deploy Token
   const Token = await hre.ethers.getContractFactory('Token')

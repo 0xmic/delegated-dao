@@ -39,7 +39,8 @@ import {
   finalizeProposalRequest,
   finalizeProposalSuccess,
   finalizeProposalFail,
-  userVotesLoaded
+  userVotesLoaded,
+  delegateesLoaded
 } from './reducers/delegatedDAO'
 
 import TOKEN_ABI from '../abis/Token.json'
@@ -328,4 +329,55 @@ export const loadUserVotes = async (delegatedDAO, account, dispatch) => {
   dispatch(userVotesLoaded(userVotes))
 
   return userVotes
+}
+
+// ---------------------------------------------------------------------------------
+// LOAD DELEGATEES
+export const loadDelegatees = async (provider, delegatedDAO, dispatch) => {
+  const block = await provider.getBlockNumber()
+
+  let delegatees = {}
+
+  // Map through delegate events
+  const delegateStream = await delegatedDAO.queryFilter('Delegate', 0, block)
+  for (let event of delegateStream) {
+    // Extract the delegatee and the amount from the event arguments
+    const { delegator, delegatee, amount } = event.args
+    const formattedAmount = ethers.utils.formatUnits(amount, 18)
+
+    // If the delegatee is not yet in the delegatees object, add them
+    if (!delegatees[delegatee]) {
+        delegatees[delegatee] = {
+            delegatee: delegatee,
+            votes: parseFloat(formattedAmount)
+        }
+    } else {
+        // If the delegatee is already in the delegatees object, add the amount to their votes
+        delegatees[delegatee].votes += parseFloat(formattedAmount)
+    }
+}
+
+   // Map through undelegate events
+   const undelegateStream = await delegatedDAO.queryFilter('Undelegate', 0, block)
+   for (let event of undelegateStream) {
+       // Extract the delegatee and the amount from the event arguments
+       const { delegator, delegatee, amount } = event.args
+       const formattedAmount = ethers.utils.formatUnits(amount, 18)
+
+       // If the delegatee is in the delegatees object, subtract the amount from their votes
+       if (delegatees[delegatee]) {
+           delegatees[delegatee].votes -= parseFloat(formattedAmount)
+           // If the delegatee's votes have become zero or less, remove them from the delegatees object
+           if (delegatees[delegatee].votes <= 0) {
+               delete delegatees[delegatee]
+           }
+       }
+   }
+
+   // Convert the delegatees object into an array of delegatee objects
+   const delegateesArray = Object.values(delegatees)
+
+   dispatch(delegateesLoaded(delegateesArray))
+
+   return delegateesArray
 }

@@ -9,6 +9,7 @@ export const delegatedDAO = createSlice({
     votingPeriodHours: 0,
     quorum: 0,
     proposals: [],
+    delegatees: [],
     delegateeVotesReceived: 0,
     proposing: {
       isProposing: false,
@@ -60,6 +61,9 @@ export const delegatedDAO = createSlice({
     },
     proposalsLoaded: (state, action) => {
       state.proposals = action.payload
+    },
+    delegateesLoaded: (state, action) => {
+      state.delegatees = action.payload
     },
     delegateeVotesReceivedLoaded: (state, action) => {
       state.delegateeVotesReceived = action.payload
@@ -186,7 +190,8 @@ export const {
   finalizeProposalRequest,
   finalizeProposalSuccess,
   finalizeProposalFail,
-  userVotesLoaded
+  userVotesLoaded,
+  delegateesLoaded
 } = delegatedDAO.actions;
 
 export default delegatedDAO.reducer;
