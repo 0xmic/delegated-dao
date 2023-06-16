@@ -1,19 +1,17 @@
 import { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import Table from 'react-bootstrap/Table'
+import Button from 'react-bootstrap/Button'
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import Blockies from 'react-blockies'
+
+import { ethers } from 'ethers';
 
 const History = () => {
-  // TODO: Create Redux slice/reducer for 'proposals' and 'account' in Redux store
-  // const proposals = useSelector(state => state.delegatedDAO.proposals)
-  // const account = useSelector(state => state.provider.account)
-  const proposals = []
-
-  const dispatch = useDispatch()
+  const proposals = useSelector(state => state.delegatedDAO.proposals)
 
   useEffect(() => {
-    // Create a function to fetch finalized proposals
-    // dispatch(fetchFinalizedProposals())
-  }, [dispatch])
+  }, [])
 
   // Table headings
   const headers = [
@@ -25,6 +23,22 @@ const History = () => {
     'Votes',
     'Status',
   ]
+
+  // Status mapping function
+  const mapStatus = status => {
+    const statusCode = Number(status);
+
+    switch(statusCode) {
+      case 0:
+        return 'Active';
+      case 1:
+        return 'Passed';
+      case 2:
+        return 'Failed';
+      default:
+        return 'Unknown';
+    }
+  }
 
   return (
     <>
@@ -45,14 +59,52 @@ const History = () => {
           </tr>
         </thead>
         <tbody>
-          {/* TODO: Replace with actual proposal data once Redux is set up */}
-          {proposals.map((proposal, index) => (
+        {proposals.filter(proposal => Number(proposal.status) === 1 || Number(proposal.status) === 2).map((proposal, index) => {
+          return (
             <tr key={index}>
-              {/* TODO: Insert logic to render each cell */}
-              <td className='text-center'>{proposal.id}</td>
-              {/* TODO: Input rest of table cells */}
+              <td className='text-center align-middle'>
+                {proposal.id.toString()}
+              </td>
+              <td className='text-center align-middle'>
+                {proposal.title.toString()}
+              </td>
+              <td className='text-center align-middle'>
+                {proposal.description.toString()}
+              </td>
+              <td className='text-center align-middle'>
+                {parseInt(proposal.amount.toString()).toLocaleString()} CT
+              </td>
+              <td className='align-middle text-center'>
+                <Blockies
+                  seed={proposal.recipient.toString()}
+                  size={10}
+                  scale={3}
+                  color='#e6e6e6'
+                  bgColor='#000000'
+                  spotColor='#ffffff'
+                  className="identicon mx-2"
+                />
+                <OverlayTrigger
+                  overlay={
+                    <Tooltip id={`tooltip-${index}`}>
+                      {proposal.recipient.toString()}
+                    </Tooltip>
+                  }
+                >
+                  <span>
+                    {proposal.recipient.toString().slice(0, 6) + '...' + proposal.recipient.toString().slice(-4)}
+                  </span>
+                </OverlayTrigger>
+              </td>
+              <td className='text-center align-middle'>
+                {parseInt(ethers.utils.formatEther(proposal.votes).split(".")[0]).toLocaleString()}
+              </td>
+              <td className='text-center align-middle'>
+                {mapStatus(proposal.status)}
+              </td>
             </tr>
-          ))}
+          )
+        })}
         </tbody>
       </Table>
     </>
