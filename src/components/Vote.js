@@ -195,7 +195,7 @@ const Vote = () => {
                 )}
               </td>
               <td className='text-center align-middle'>
-                {!isFinalized && canVote && !userVotes[proposal.id] &&
+                {!isFinalized && canFinalize &&
                   parseFloat(ethers.utils.formatUnits(proposal.votes, 18).toString()) >=  quorum &&
                   Date.now() < proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000 && (
                   <Button variant='primary' style={{ width: '100%' }} onClick={(e) => finalizeHandler(e, proposal.id)}>
