@@ -74,7 +74,7 @@ const History = () => {
               <td className='text-center align-middle'>
                 {parseInt(proposal.amount.toString()).toLocaleString()} CT
               </td>
-              <td className='align-middle text-center'>
+              <td className='d-flex align-items-center justify-content-center'>
                 <Blockies
                   seed={proposal.recipient.toString()}
                   size={10}

@@ -146,14 +146,14 @@ contract DelegatedDAO {
         require(token.transferFrom(msg.sender, address(this), amount), "Transfer failed");
         delegatorBalance[msg.sender] = amount;
 
-        // Update Total Tokens Delegated
-        totalTokensDelegated += amount;
-
         // Delegate votes
         delegateeDelegatorCount[_delegatee]++;
         delegateeDelegators[_delegatee][delegateeDelegatorCount[_delegatee]] = msg.sender;
         delegateeDelegatorIndex[_delegatee][msg.sender] = delegateeDelegatorCount[_delegatee];
         delegateeVotesReceived[_delegatee] += amount;
+
+        // Update Total Tokens Delegated
+        totalTokensDelegated += amount;
 
         // Set delegatorDelegatee to delegatee
         delegatorDelegatee[msg.sender] = _delegatee;

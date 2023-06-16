@@ -150,7 +150,7 @@ const Vote = () => {
               <td className='text-center align-middle'>
                 {parseInt(proposal.amount.toString()).toLocaleString()} CT
               </td>
-              <td className='align-middle'>
+              <td className='d-flex align-items-center justify-content-center'>
                 <Blockies
                   seed={proposal.recipient.toString()}
                   size={10}
@@ -179,14 +179,16 @@ const Vote = () => {
                 {mapStatus(proposal.status)}
               </td>
               <td className='text-center align-middle'>
-                {!isFinalized && canVote && !userVotes[proposal.id] && (
+                {!isFinalized && canVote && !userVotes[proposal.id] &&
+                  Date.now() < proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000 && (
                   <Button variant='primary' style={{ width: '100%' }} onClick={(e) => upVoteHandler(e, proposal.id)}>
                     👍
                   </Button>
                 )}
               </td>
               <td className='text-center align-middle'>
-                {!isFinalized && canVote && !userVotes[proposal.id] && (
+                {!isFinalized && canVote && !userVotes[proposal.id] &&
+                  Date.now() < proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000 && (
                   <Button variant='primary' style={{ width: '100%' }} onClick={(e) => downVoteHandler(e, proposal.id)}>
                     👎
                   </Button>
