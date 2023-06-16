@@ -24,7 +24,23 @@ export const delegatedDAO = createSlice({
       isUndelegating: false,
       isSuccess: false,
       transactionHash: null
-    }
+    },
+    upVoting: {
+      isUpVoting: false,
+      isSuccess: false,
+      transactionHash: null
+    },
+    downVoting: {
+      isDownVoting: false,
+      isSuccess: false,
+      transactionHash: null
+    },
+    finalizing: {
+      isFinalizing: false,
+      isSuccess: false,
+      transactionHash: null
+    },
+    userVotes: {},
   },
   reducers: {
     setDelegatedDAOContract: (state, action) => {
@@ -92,6 +108,54 @@ export const delegatedDAO = createSlice({
       state.undelegating.isUndelegating = false
       state.undelegating.isSuccess = false
       state.undelegating.transactionHash = null
+    },
+    upVoteRequest: (state, action) => {
+      state.upVoting.isUpVoting = true
+      state.upVoting.isSuccess = false
+      state.upVoting.transactionHash = null
+    },
+    upVoteSuccess: (state, action) => {
+      state.upVoting.isUpVoting = false
+      state.upVoting.isSuccess = true
+      state.upVoting.transactionHash = action.payload
+    },
+    upVoteFail: (state, action) => {
+      state.upVoting.isUpVoting = false
+      state.upVoting.isSuccess = false
+      state.upVoting.transactionHash = null
+    },
+    downVoteRequest: (state, action) => {
+      state.downVoting.isDownVoting = true
+      state.downVoting.isSuccess = false
+      state.downVoting.transactionHash = null
+    },
+    downVoteSuccess: (state, action) => {
+      state.downVoting.isDownVoting = false
+      state.downVoting.isSuccess = true
+      state.downVoting.transactionHash = action.payload
+    },
+    downVoteFail: (state, action) => {
+      state.downVoting.isDownVoting = false
+      state.downVoting.isSuccess = false
+      state.downVoting.transactionHash = null
+    },
+    finalizeProposalRequest: (state, action) => {
+      state.finalizing.isFinalizing = false
+      state.finalizing.isSuccess = false
+      state.finalizing.transactionHash = null
+    },
+    finalizeProposalSuccess: (state, action) => {
+      state.finalizing.isFinalizing = false
+      state.finalizing.isSuccess = true
+      state.finalizing.transactionHash = action.payload
+    },
+    finalizeProposalFail: (state, action) => {
+      state.finalizing.isFinalizing = false
+      state.finalizing.isSuccess = false
+      state.finalizing.transactionHash = null
+    },
+    userVotesLoaded: (state, action) => {
+      state.userVotes = action.payload
     }
   }
 })
@@ -112,7 +176,17 @@ export const {
   delegateFail,
   undelegateRequest,
   undelegateSuccess,
-  undelegateFail
+  undelegateFail,
+  upVoteRequest,
+  upVoteSuccess,
+  upVoteFail,
+  downVoteRequest,
+  downVoteSuccess,
+  downVoteFail,
+  finalizeProposalRequest,
+  finalizeProposalSuccess,
+  finalizeProposalFail,
+  userVotesLoaded
 } = delegatedDAO.actions;
 
 export default delegatedDAO.reducer;

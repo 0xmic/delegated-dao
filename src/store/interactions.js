@@ -29,7 +29,17 @@ import {
   undelegateFail,
   votingPeriodHoursLoaded,
   quorumLoaded,
-  proposalsLoaded
+  proposalsLoaded,
+  upVoteRequest,
+  upVoteSuccess,
+  upVoteFail,
+  downVoteRequest,
+  downVoteSuccess,
+  downVoteFail,
+  finalizeProposalRequest,
+  finalizeProposalSuccess,
+  finalizeProposalFail,
+  userVotesLoaded
 } from './reducers/delegatedDAO'
 
 import TOKEN_ABI from '../abis/Token.json'
@@ -245,4 +255,77 @@ export const loadProposals = async (delegatedDAO, dispatch) => {
   dispatch(proposalsLoaded(proposals))
 
   return proposals
+}
+
+// ---------------------------------------------------------------------------------
+// VOTING: UPVOTE, DOWNVOTE, FINALIZE
+export const upVote = async (provider, delegatedDAO, id, dispatch) => {
+  try {
+    dispatch(upVoteRequest())
+
+    let transaction
+
+    const signer = await provider.getSigner()
+
+    transaction = await delegatedDAO.connect(signer).upVote(id)
+    await transaction.wait()
+
+    dispatch(upVoteSuccess(transaction.hash))
+
+  } catch (error) {
+    dispatch(upVoteFail())
+  }
+}
+
+export const downVote = async (provider, delegatedDAO, id, dispatch) => {
+  try {
+    dispatch(downVoteRequest())
+
+    let transaction
+
+    const signer = await provider.getSigner()
+
+    transaction = await delegatedDAO.connect(signer).downVote(id)
+    await transaction.wait()
+
+    dispatch(downVoteSuccess(transaction.hash))
+
+  } catch (error) {
+    dispatch(downVoteFail())
+  }
+}
+
+export const finalizeProposal = async (provider, delegatedDAO, id, dispatch) => {
+  try {
+    dispatch(finalizeProposalRequest())
+
+    let transaction
+
+    const signer = await provider.getSigner()
+
+    transaction = await delegatedDAO.connect(signer).finalizeProposal(id)
+    await transaction.wait()
+
+    dispatch(finalizeProposalSuccess(transaction.hash))
+
+  } catch (error) {
+    dispatch(finalizeProposalFail())
+  }
+}
+
+// ---------------------------------------------------------------------------------
+// LOAD USER VOTES
+export const loadUserVotes = async (delegatedDAO, account, dispatch) => {
+  let userVotes = {}
+
+  let count = parseInt(await delegatedDAO.proposalCount())
+
+  for (var i = 0; i < count; i++) {
+    const hasVoted = ethers.utils.formatUnits(await delegatedDAO.votesCast(account, i + 1), 18)
+    userVotes[i + 1] = parseInt(hasVoted)
+  }
+
+  dispatch(userVotesLoaded(userVotes))
+
+  return userVotes
 }

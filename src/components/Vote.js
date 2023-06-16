@@ -7,14 +7,25 @@ import Blockies from 'react-blockies'
 
 import { ethers } from 'ethers';
 
+import {
+  upVote,
+  downVote,
+  finalizeProposal
+} from '../store/interactions'
+
 const Vote = () => {
+  const dispatch = useDispatch()
+
+  const provider = useSelector(state => state.provider.connection)
   const account = useSelector(state => state.provider.account)
   const balance = useSelector(state => state.token.balance)
+  const delegatedDAO = useSelector(state => state.delegatedDAO.contract)
   const delegatorBalance = useSelector(state => state.delegatedDAO.delegatorBalance)
   const delegateeVotesReceived = useSelector(state => state.delegatedDAO.delegateeVotesReceived)
   const votingPeriodHours = useSelector(state => state.delegatedDAO.votingPeriodHours)
   const quorum = useSelector(state => state.delegatedDAO.quorum)
   const proposals = useSelector(state => state.delegatedDAO.proposals)
+  const userVotes = useSelector(state => state.delegatedDAO.userVotes)
 
   useEffect(() => {
   }, [])
@@ -49,34 +60,34 @@ const Vote = () => {
     }
   }
 
-  const upVoteHandler = async (e) => {
+  const upVoteHandler = async (e, id) => {
     e.preventDefault()
 
-    // upVote(delegatedDAO, dispatch)
-    //   .then(() => {
-    //     window.location.reload();
-    //   })
-    //   .catch(err => console.error(err));
+    upVote(provider, delegatedDAO, id, dispatch)
+      .then(() => {
+        window.location.reload();
+      })
+      .catch(err => console.error(err));
   }
 
-  const downVoteHandler = async (e) => {
+  const downVoteHandler = async (e, id) => {
     e.preventDefault()
 
-    // upVote(delegatedDAO, dispatch)
-    //   .then(() => {
-    //     window.location.reload();
-    //   })
-    //   .catch(err => console.error(err));
+    downVote(provider, delegatedDAO, id, dispatch)
+      .then(() => {
+        window.location.reload();
+      })
+      .catch(err => console.error(err));
   }
 
-  const finalizeHandler = async (e) => {
+  const finalizeHandler = async (e, id) => {
     e.preventDefault()
 
-    // upVote(delegatedDAO, dispatch)
-    //   .then(() => {
-    //     window.location.reload();
-    //   })
-    //   .catch(err => console.error(err));
+    finalizeProposal(provider, delegatedDAO, id, dispatch)
+      .then(() => {
+        window.location.reload();
+      })
+      .catch(err => console.error(err));
   }
 
   return (
@@ -100,7 +111,6 @@ const Vote = () => {
         <strong>Quorum:</strong> {account ? `${parseInt(quorum).toLocaleString()} votes` : 'connect wallet'}
         <br />
         <br />
-        {/* TODO: Update to add delegated voting power for delegatees */}
         <strong>Your Voting Power:</strong> {
           parseFloat(delegateeVotesReceived) > 0 ? (parseFloat(delegateeVotesReceived) + parseFloat(balance)).toLocaleString() :
           parseFloat(balance) > 0 ? parseFloat(balance).toLocaleString() :
@@ -121,9 +131,13 @@ const Vote = () => {
           </tr>
         </thead>
         <tbody>
-          {proposals.map((proposal, index) => (
+          {proposals.map((proposal, index) => {
+            const isFinalized = proposal.status === 0 ? 0 : 1
+            const canVote = parseFloat(delegateeVotesReceived) > 0 || parseFloat(balance) > 0
+            const canFinalize = parseFloat(delegateeVotesReceived) > 0 || parseFloat(balance) > 0 || parseFloat(delegatorBalance) > 0
 
-            <tr key={index}>
+            return (
+              <tr key={index}>
               <td className='text-center'>
                 {proposal.id.toString()}
               </td>
@@ -165,31 +179,34 @@ const Vote = () => {
                 {mapStatus(proposal.status)}
               </td>
               <td className='text-center'>
-                {/* TODO: Add button + Redux handler */}
-                {/* TODO: Change output depending on user: investor, non-investor */}
-                <Button variant='primary' style={{ width: '100%' }} onClick={() => upVoteHandler(proposal.id)}>
-                  👍
-                </Button>
+                {!isFinalized && canVote && !userVotes[proposal.id] && (
+                  <Button variant='primary' style={{ width: '100%' }} onClick={(e) => upVoteHandler(e, proposal.id)}>
+                    👍
+                  </Button>
+                )}
               </td>
               <td className='text-center'>
-                {/* TODO: Add button + Redux handler */}
-                {/* TODO: Change output depending on user: investor, non-investor */}
-                <Button variant='primary' style={{ width: '100%' }} onClick={() => downVoteHandler(proposal.id)}>
-                👎
-                </Button>
+                {!isFinalized && canVote && !userVotes[proposal.id] && (
+                  <Button variant='primary' style={{ width: '100%' }} onClick={(e) => downVoteHandler(e, proposal.id)}>
+                    👎
+                  </Button>
+                )}
               </td>
               <td className='text-center'>
-                {/* TODO: Add button + Redux handler */}
-                {/* TODO: Change output depending on user: investor, non-investor */}
-                <Button variant='primary' style={{ width: '100%' }} onClick={() => finalizeHandler(proposal.id)}>
+                {!isFinalized && (canVote || parseFloat(delegatorBalance) > 0) && canFinalize &&
+                parseFloat(ethers.utils.formatUnits(proposal.votes, 18).toString()) >=  quorum &&
+                (
+                  <Button variant='primary' style={{ width: '100%' }} onClick={(e) => finalizeHandler(e, proposal.id)}>
                     ⚖️
                   </Button>
+                )}
               </td>
               <td className='text-center'>
                 {new Date(proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000).toLocaleString()}
               </td>
             </tr>
-          ))}
+            )
+          })}
         </tbody>
       </Table>
     </>

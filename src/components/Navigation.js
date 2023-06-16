@@ -15,7 +15,8 @@ import {
   loadDelegateeVotesReceived,
   loadVotingPeriodHours,
   loadQuorum,
-  loadProposals
+  loadProposals,
+  loadUserVotes
 } from '../store/interactions'
 
 import config from '../config.json'
@@ -38,6 +39,7 @@ const Navigation = () => {
     const votingPeriodHours = await loadVotingPeriodHours(delegatedDAO, dispatch)
     const quorum = await loadQuorum(delegatedDAO, dispatch)
     const proposals = await loadProposals(delegatedDAO, dispatch)
+    const userVotes = await loadUserVotes(delegatedDAO, account, dispatch)
   }
 
   const networkHandler = async (e) => {
