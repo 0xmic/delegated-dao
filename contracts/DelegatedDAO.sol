@@ -239,7 +239,18 @@ contract DelegatedDAO {
 
         // Add delegated votes if the voter is a delegatee
         if (delegateeDelegatorCount[msg.sender] > 0) {
-            voteWeight += delegateeVotesReceived[msg.sender];
+            uint256 delegateeVoteWeight = delegateeVotesReceived[msg.sender];
+
+            // Check if any of delegatee's delegators have voted on the proposal
+            for (uint256 i = 1; i <= delegateeDelegatorCount[msg.sender]; i++) {
+                address delegator = delegateeDelegators[msg.sender][i];
+
+                // If a delegator has voted on the proposal, their vote shouldn't be counted twice
+                if (votesCast[delegator][_id] != 0) {
+                    delegateeVoteWeight -= delegatorBalance[delegator];
+                }
+            }
+            voteWeight += delegateeVoteWeight;
         }
 
         proposal.votes += int(voteWeight);
@@ -248,7 +259,9 @@ contract DelegatedDAO {
         votesCast[msg.sender][_id] = int(voteWeight);
         for(uint256 i = 1; i <= delegateeDelegatorCount[msg.sender]; i++) {
             address delegator = delegateeDelegators[msg.sender][i];
-            votesCast[delegator][_id] = int(delegatorBalance[delegator]);
+            if (votesCast[delegator][_id] == 0) {
+                votesCast[delegator][_id] = int(delegatorBalance[delegator]);
+            }
         }
 
         emit UpVote(_id, msg.sender);
@@ -268,16 +281,29 @@ contract DelegatedDAO {
 
         // Add delegated votes if the voter is a delegatee
         if (delegateeDelegatorCount[msg.sender] > 0) {
-            voteWeight += delegateeVotesReceived[msg.sender];
+            uint256 delegateeVoteWeight = delegateeVotesReceived[msg.sender];
+
+            // Check if any of delegatee's delegators have voted on the proposal
+            for (uint256 i = 1; i <= delegateeDelegatorCount[msg.sender]; i++) {
+                address delegator = delegateeDelegators[msg.sender][i];
+
+                // If a delegator has voted on the proposal, their vote shouldn't be counted twice
+                if (votesCast[delegator][_id] != 0) {
+                    delegateeVoteWeight -= delegatorBalance[delegator];
+                }
+            }
+            voteWeight += delegateeVoteWeight;
         }
 
         proposal.votes -= int(voteWeight);
 
         // Record votes cast by the voter and all delegators who delegated to this voter
-        votesCast[msg.sender][_id] -= int(voteWeight);
+        votesCast[msg.sender][_id] = -int(voteWeight);
         for(uint256 i = 1; i <= delegateeDelegatorCount[msg.sender]; i++) {
             address delegator = delegateeDelegators[msg.sender][i];
-            votesCast[delegator][_id] -= int(delegatorBalance[delegator]);
+            if (votesCast[delegator][_id] == 0) {
+                votesCast[delegator][_id] = -int(delegatorBalance[delegator]);
+            }
         }
 
         emit DownVote(_id, msg.sender);
