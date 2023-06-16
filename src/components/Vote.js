@@ -150,7 +150,7 @@ const Vote = () => {
               <td className='text-center align-middle'>
                 {parseInt(proposal.amount.toString()).toLocaleString()} CT
               </td>
-              <td className='d-flex align-items-center justify-content-center'>
+              <td style={{padding: 12}} className='d-flex align-items-center justify-content-center'>
                 <Blockies
                   seed={proposal.recipient.toString()}
                   size={10}
@@ -196,6 +196,7 @@ const Vote = () => {
               </td>
               <td className='text-center align-middle'>
                 {!isFinalized && canVote && !userVotes[proposal.id] &&
+                  parseFloat(ethers.utils.formatUnits(proposal.votes, 18).toString()) >=  quorum &&
                   Date.now() < proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000 && (
                   <Button variant='primary' style={{ width: '100%' }} onClick={(e) => finalizeHandler(e, proposal.id)}>
                     ✅
