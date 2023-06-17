@@ -188,7 +188,7 @@ async function main() {
   // Create Proposal 2
   transaction = await delegatedDAO
           .connect(investor1)
-          .createProposal('NFTs', 'Launch DAO NFTs', tokens(100000), recipient.address)
+          .createProposal('Advisors', 'Legal & Compliance', tokens(100000), recipient.address)
   await transaction.wait()
   console.log(`Proposal 2 created: ${(await delegatedDAO.proposals(2))}`)
 
@@ -197,7 +197,14 @@ async function main() {
           .connect(investor1)
           .createProposal('Liquidity Pool', 'Create Uniswap LP', tokens(100000), recipient.address)
   await transaction.wait()
-  console.log(`Proposal 3 created: ${(await delegatedDAO.proposals(3))}\n`)
+  console.log(`Proposal 3 created: ${(await delegatedDAO.proposals(3))}`)
+
+  // Create Proposal 4
+  transaction = await delegatedDAO
+          .connect(investor1)
+          .createProposal('NFTs', 'Launch DAO NFTs', tokens(100000), recipient.address)
+  await transaction.wait()
+  console.log(`Proposal 4 created: ${(await delegatedDAO.proposals(4))}\n`)
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Vote on Proposals
@@ -222,6 +229,12 @@ async function main() {
   transaction = await delegatedDAO.connect(investorDelegate3).upVote(3)
   await transaction.wait()
   console.log(`Proposal 3 votes: ${(await delegatedDAO.proposals(3)).votes}\n`)
+
+  // investorDelegate4 votes on proposal4 without any delegated voting power
+  console.log(`InvestorDelegate4 votes on proposal 4...`)
+  transaction = await delegatedDAO.connect(investorDelegate4).upVote(4)
+  await transaction.wait()
+  console.log(`Proposal 4 votes: ${(await delegatedDAO.proposals(4)).votes}\n`)
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Vote on and finalize Proposal 1
