@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import Table from 'react-bootstrap/Table'
 import Button from 'react-bootstrap/Button'
+import Spinner from 'react-bootstrap/Spinner'
 import { OverlayTrigger, Tooltip } from 'react-bootstrap'
 import Blockies from 'react-blockies'
 
@@ -19,6 +20,10 @@ const Vote = () => {
   const dispatch = useDispatch()
 
   const [showAlert, setShowAlert] = useState(false)
+
+  const [loadingUpVoteId, setLoadingUpVoteId] = useState(null);
+  const [loadingDownVoteId, setLoadingDownVoteId] = useState(null);
+  const [loadingFinalizeId, setLoadingFinalizeId] = useState(null);
 
   const provider = useSelector(state => state.provider.connection)
   const account = useSelector(state => state.provider.account)
@@ -77,10 +82,11 @@ const Vote = () => {
 
   const upVoteHandler = async (e, id) => {
     e.preventDefault()
-
     setShowAlert(false)
+    setLoadingUpVoteId(id)
 
     const success = await upVote(provider, delegatedDAO, id, dispatch)
+    setLoadingUpVoteId(null)
 
     if (success) {
       window.location.reload()
@@ -91,10 +97,11 @@ const Vote = () => {
 
   const downVoteHandler = async (e, id) => {
     e.preventDefault()
-
     setShowAlert(false)
+    setLoadingDownVoteId(id)
 
     const success = await downVote(provider, delegatedDAO, id, dispatch)
+    setLoadingDownVoteId(null)
 
     if (success) {
       window.location.reload()
@@ -105,10 +112,11 @@ const Vote = () => {
 
   const finalizeHandler = async (e, id) => {
     e.preventDefault()
-
     setShowAlert(false)
+    setLoadingFinalizeId(id)
 
     const success = await finalizeProposal(provider, delegatedDAO, id, dispatch)
+    setLoadingFinalizeId(null)
 
     if (success) {
       window.location.reload()
@@ -146,11 +154,9 @@ const Vote = () => {
         3. Proposals can only finalize as Failed after expiration, regardless or votes received.
         <br />
         <br />
-        <strong>Voting Period:</strong> {account ? `${parseInt(votingPeriodHours).toLocaleString()} hours` : 'connect wallet'}
-        <br />
+        <strong>Voting Period:</strong> {account ? `${parseInt(votingPeriodHours).toLocaleString()} hrs · ` : 'connect wallet · '}
+        <strong>DAO Treasury:</strong> {account ? `${parseInt(daoBalance).toLocaleString()} CT · ` : 'connect wallet · '}
         <strong>Quorum:</strong> {account ? `${parseInt(quorum).toLocaleString()} votes` : 'connect wallet'}
-        <br />
-        <strong>DAO Treasury:</strong> {account ? `${parseInt(daoBalance).toLocaleString()} CT` : 'connect wallet'}
         <br />
         <br />
         <strong>Your Voting Power:</strong> {
@@ -221,35 +227,43 @@ const Vote = () => {
                 {isExpired(proposal) && Number(proposal.status) === 0 ? 'Expired' : mapStatus(proposal.status)}
               </td>
               <td className='text-center align-middle'>
-                {!isFinalized && canVote && !userVotes[proposal.id] &&
-                  Date.now() < proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000 && (
+              {!isFinalized && canVote && !userVotes[proposal.id] &&
+                Date.now() < proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000 && (
+                loadingUpVoteId === proposal.id ?
+                  <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} /> :
                   <Button variant='primary' style={{ width: '100%' }} onClick={(e) => upVoteHandler(e, proposal.id)}>
                     👍
                   </Button>
-                )}
+              )}
               </td>
               <td className='text-center align-middle'>
                 {!isFinalized && canVote && !userVotes[proposal.id] &&
                   Date.now() < proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000 && (
-                  <Button variant='primary' style={{ width: '100%' }} onClick={(e) => downVoteHandler(e, proposal.id)}>
-                    👎
-                  </Button>
+                  loadingDownVoteId === proposal.id ?
+                    <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} /> :
+                    <Button variant='primary' style={{ width: '100%' }} onClick={(e) => downVoteHandler(e, proposal.id)}>
+                      👎
+                    </Button>
                 )}
               </td>
               <td className='text-center align-middle'>
                 {!isFinalized && canFinalize &&
                   parseFloat(ethers.utils.formatUnits(proposal.votes, 18).toString()) >=  quorum &&
-                  parseFloat(ethers.utils.formatUnits(proposal.amount, 18).toString()) <= parseFloat(ethers.utils.formatUnits(daoBalance, 18).toString()) &&
+                  parseFloat(ethers.utils.formatUnits(proposal.amount, 18).toString()) <= parseFloat(daoBalance.toString()) &&
                   Date.now() < proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000 && (
-                  <Button variant='primary' style={{ width: '100%' }} onClick={(e) => finalizeHandler(e, proposal.id)}>
-                    ✅
-                  </Button>
+                  loadingFinalizeId === proposal.id ?
+                    <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} /> :
+                    <Button variant='primary' style={{ width: '100%' }} onClick={(e) => finalizeHandler(e, proposal.id)}>
+                      ✅
+                    </Button>
                 )}
                 {!isFinalized && canFinalize &&
                   Date.now() >= proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000 && (
-                  <Button variant='primary' style={{ width: '100%' }} onClick={(e) => finalizeHandler(e, proposal.id)}>
-                    ❌
-                  </Button>
+                  loadingFinalizeId === proposal.id ?
+                    <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} /> :
+                    <Button variant='primary' style={{ width: '100%' }} onClick={(e) => finalizeHandler(e, proposal.id)}>
+                      ❌
+                    </Button>
                 )}
               </td>
               <td className='text-center align-middle'>
