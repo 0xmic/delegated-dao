@@ -133,16 +133,16 @@ const Vote = () => {
         <br />
         1. DAO members who have not delegated their votes are eligible to vote on proposals.
         <br />
+        2. Votes must be made within the voting period (established upon proposal creation).
+        <br />
         <br />
         <strong>Finalization Requirements:</strong>
         <br />
         1. All DAO member (delegated or not) can finalize proposals.
         <br />
-        2. Proposals only finalize as Passed if they reach quorum within the voting period.
+        2. Proposals can be finalized as Passed if they reach quorum within the voting period.
         <br />
-        3. Proposals only finalize as Failed if they expire without finalizing as Passed.
-        <br />
-        4. The voting period begins upon proposal creation, and is hard coded upon DAO creation.
+        3. Proposals can only finalize as Failed after expiration, regardless or votes received.
         <br />
         <br />
         <strong>Voting Period:</strong> {account ? `${parseInt(votingPeriodHours).toLocaleString()} hours` : 'connect wallet'}
