@@ -13,7 +13,7 @@ const Delegatees = () => {
 
   return (
     <>
-      <h2 className='my-4 text-center'>Current Delegates</h2>
+      <h1 className='my-4 text-center'>Current Delegates</h1>
 
       <p className='text-center'>
         Below are all DAO members who have received delegation from other members.
