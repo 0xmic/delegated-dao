@@ -129,11 +129,20 @@ const Vote = () => {
         where each vote is weighted by a member's voting power (i.e. the number of tokens you hold).
         <br />
         <br />
-        <strong>Proposal Finalization Requirements:</strong>
+        <strong>Voting Requirements:</strong>
         <br />
-        A proposal can only pass if it is finalized with a passing quorum during the voting period.
+        1. DAO members who have not delegated their votes are eligible to vote on proposals.
         <br />
-        The voting period begins upon proposal creation, and is hard coded upon DAO creation.
+        <br />
+        <strong>Finalization Requirements:</strong>
+        <br />
+        1. All DAO member (delegated or not) can finalize proposals.
+        <br />
+        2. Proposals only finalize as Passed if they reach quorum within the voting period.
+        <br />
+        3. Proposals only finalize as Failed if they expire without finalizing as Passed.
+        <br />
+        4. The voting period begins upon proposal creation, and is hard coded upon DAO creation.
         <br />
         <br />
         <strong>Voting Period:</strong> {account ? `${parseInt(votingPeriodHours).toLocaleString()} hours` : 'connect wallet'}

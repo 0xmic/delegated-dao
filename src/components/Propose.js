@@ -78,7 +78,7 @@ const Propose = () => {
         <br />
         <strong>Proposal Requirements:</strong>
         <br />
-        The DAO treasury must hold enough tokens to distribute to proposal recipient.
+        1. The DAO treasury must hold enough tokens to cover the amount proposed.
         <br />
         <br />
         {/* TODO: Update to subtract tokens sent to DAO for delegation. Need to fix in interactions file */}

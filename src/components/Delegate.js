@@ -95,9 +95,9 @@ const Delegate = () => {
         <br />
         <strong>Delegation Requirements:</strong>
         <br />
-        Delegators - DAO members who have delegated voting power to another DAO member - are unable to receive delegation.
+        1. Delegators (DAO members who have delegated their votes) are unable to receive delegation.
         <br />
-        Delegatees - DAO members who have received delegation - are unable to delegate the voting power they have accumulated.
+        2. Delegatees (DAO members who have received delegation) are unable to delegate accumulated votes.
         <br />
         <br />
         <strong>Your Votes:</strong> {

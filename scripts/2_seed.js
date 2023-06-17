@@ -179,7 +179,7 @@ async function main() {
   // Create Proposal 1
   transaction = await delegatedDAO
           .connect(investor1)
-          .createProposal('Website', 'Develop Website', tokens(100000), recipient.address)
+          .createProposal('Website', 'Develop DAO + Website', tokens(100000), recipient.address)
   await transaction.wait()
   console.log(`Proposal 1 created: ${(await delegatedDAO.proposals(1))}`)
 
@@ -193,7 +193,7 @@ async function main() {
   // Create Proposal 3
   transaction = await delegatedDAO
           .connect(investor1)
-          .createProposal('Liquidity Pool', 'Create Uniswap LP', tokens(100000), recipient.address)
+          .createProposal('Market', 'Create Liquidity Pool', tokens(100000), recipient.address)
   await transaction.wait()
   console.log(`Proposal 3 created: ${(await delegatedDAO.proposals(3))}`)
 
