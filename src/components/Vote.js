@@ -23,6 +23,7 @@ const Vote = () => {
   const provider = useSelector(state => state.provider.connection)
   const account = useSelector(state => state.provider.account)
   const balance = useSelector(state => state.token.balance)
+  const daoBalance = useSelector(state => state.token.daoBalance)
   const delegatedDAO = useSelector(state => state.delegatedDAO.contract)
   const delegatorBalance = useSelector(state => state.delegatedDAO.delegatorBalance)
   const delegateeVotesReceived = useSelector(state => state.delegatedDAO.delegateeVotesReceived)
@@ -149,6 +150,8 @@ const Vote = () => {
         <br />
         <strong>Quorum:</strong> {account ? `${parseInt(quorum).toLocaleString()} votes` : 'connect wallet'}
         <br />
+        <strong>DAO Treasury:</strong> {account ? `${parseInt(daoBalance).toLocaleString()} CT` : 'connect wallet'}
+        <br />
         <br />
         <strong>Your Voting Power:</strong> {
           parseFloat(delegateeVotesReceived) > 0 ? (parseFloat(delegateeVotesReceived) + parseFloat(balance)).toLocaleString() :
@@ -236,6 +239,7 @@ const Vote = () => {
               <td className='text-center align-middle'>
                 {!isFinalized && canFinalize &&
                   parseFloat(ethers.utils.formatUnits(proposal.votes, 18).toString()) >=  quorum &&
+                  parseFloat(ethers.utils.formatUnits(proposal.amount, 18).toString()) <= parseFloat(ethers.utils.formatUnits(daoBalance, 18).toString()) &&
                   Date.now() < proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000 && (
                   <Button variant='primary' style={{ width: '100%' }} onClick={(e) => finalizeHandler(e, proposal.id)}>
                     ✅

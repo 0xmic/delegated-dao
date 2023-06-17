@@ -655,7 +655,6 @@ describe('Delegated DAO', () => {
         transaction = await delegatedDAO.connect(investor6).upVote(1)
         result = await transaction.wait()
 
-        // TODO: Make sure finalizeProposal sends correct tokens to recipient
         transaction = await delegatedDAO.connect(investor1).finalizeProposal(1)
         result = await transaction.wait()
       })

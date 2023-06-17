@@ -81,7 +81,6 @@ const Propose = () => {
         1. The DAO treasury must hold enough tokens to cover the amount proposed.
         <br />
         <br />
-        {/* TODO: Update to subtract tokens sent to DAO for delegation. Need to fix in interactions file */}
         <strong>DAO Treasury:</strong> {account ? `${parseInt(daoBalance).toLocaleString()} CT` : 'connect wallet'}
       </p>
 
