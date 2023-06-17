@@ -11,8 +11,6 @@ const tokens = (n) => {
   return hre.ethers.utils.parseUnits(n.toString(), 'ether')
 }
 
-const ether = tokens
-
 async function main() {
 
   console.log(`> Fetching accounts & network...\n`)
