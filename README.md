@@ -3,11 +3,17 @@ This project demonstrates a full stack DAO project governed by an ERC-20 token. 
 
 ## Proposal Life Cycle
 Step 0a: Deploy Token and DelegatedDAO contracts
+
 Step 0b: Seed Investors and DAO with Tokens
+
 Step 1: (Un)Delegate Votes
+
 Step 2: Create Proposals
+
 Step 3: Vote on Proposals
+
 Step 4a: Finalize as Passed: Quorum Reached - distribute funds
+
 Step 4b: Finalize as Failed: Proposal Expired - no funds distributed
 
 ## Local Testing
