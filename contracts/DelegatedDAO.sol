@@ -54,20 +54,11 @@ contract DelegatedDAO {
     /* @notice Delegatee address to voting power received from delegators */
     mapping(address => uint256) public delegateeVotesReceived;
 
-    event Propose(
-        uint256 id,
-        uint256 amount,
-        address recipient,
-        address creator,
-        string description
-    );
-
+    event Propose(uint256 id, uint256 amount, address recipient,address creator, string description);
     event Delegate(address indexed delegator, address indexed delegatee, uint256 amount, uint256 timestamp);
     event Undelegate(address indexed delegator, address indexed delegatee, uint256 amount, uint256 timestamp);
-
     event UpVote(uint256 id, address investor);
     event DownVote(uint256 id, address investor);
-
     event Finalize(uint256 id, address recipient, ProposalStatus status);
 
     /* @notice Constructor for creating the DAO
@@ -223,7 +214,6 @@ contract DelegatedDAO {
 
         emit Undelegate(msg.sender, removedDelegatee, amount, block.timestamp);
     }
-
 
     /* @notice Upvote a proposal
      * @param _id The ID of the proposal
