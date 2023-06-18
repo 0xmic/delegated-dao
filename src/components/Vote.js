@@ -275,9 +275,23 @@ const Vote = () => {
         </tbody>
       </Table>
 
-      {isUpVoting || isDownVoting || isFinalizing ? (
+      {isUpVoting ? (
         <Alert
-          message={'Transaction Pending...'}
+          message={'Up Vote Pending...'}
+          transactionHash={null}
+          variant={'info'}
+          setShowAlert={setShowAlert}
+        />
+      ) : isDownVoting ? (
+        <Alert
+          message={'Down Vote Pending...'}
+          transactionHash={null}
+          variant={'info'}
+          setShowAlert={setShowAlert}
+        />
+      ) : isFinalizing ? (
+        <Alert
+          message={'Finalization Pending...'}
           transactionHash={null}
           variant={'info'}
           setShowAlert={setShowAlert}

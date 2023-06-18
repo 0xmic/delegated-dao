@@ -238,9 +238,16 @@ const Delegate = () => {
         </>
       )}
 
-      {isDelegating || isUndelegating ? (
+      {isDelegating ?
+         <Alert
+          message={'Delegation Pending...'}
+          transactionHash={null}
+          variant={'info'}
+          setShowAlert={setShowAlert}
+        />
+      : isUndelegating ? (
         <Alert
-          message={'Transaction Pending...'}
+          message={'Undelegation Pending...'}
           transactionHash={null}
           variant={'info'}
           setShowAlert={setShowAlert}
