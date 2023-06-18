@@ -332,6 +332,16 @@ describe('Delegated DAO', () => {
       // investor1 undelegates
       transaction = await delegatedDAO.connect(investor1).undelegate()
       result = await transaction.wait()
+
+      // investor1 delegates to investorDelegate1 a second time
+      transaction = await token.connect(investor1).approve(delegatedDAO.address, 100000)
+      await transaction.wait()
+      transaction = await delegatedDAO.connect(investor1).delegate(investorDelegate1.address)
+      result = transaction.wait()
+
+      // investor1 undelegates a second time
+      transaction = await delegatedDAO.connect(investor1).undelegate()
+      result = await transaction.wait()
     })
 
     describe('Success', () => {

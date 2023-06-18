@@ -179,7 +179,7 @@ async function main() {
   // Create Proposal 1
   transaction = await delegatedDAO
           .connect(investor1)
-          .createProposal('Website', 'Develop DAO + Website', tokens(100000), recipient.address)
+          .createProposal('Website', 'Develop DAO Smart Contracts + Website', tokens(100000), recipient.address)
   await transaction.wait()
   console.log(`Proposal 1 created: ${(await delegatedDAO.proposals(1))}`)
 

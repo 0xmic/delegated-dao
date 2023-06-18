@@ -151,7 +151,7 @@ const Vote = () => {
         <br />
         2. Proposals can be finalized as Passed if they reach quorum within the voting period.
         <br />
-        3. Proposals can only finalize as Failed after expiration, regardless or votes received.
+        3. Proposals can only finalize as Failed after expiration, regardless of votes received.
         <br />
         <br />
         <strong>Voting Period:</strong> {account ? `${parseInt(votingPeriodHours).toLocaleString()} hrs · ` : 'connect wallet · '}

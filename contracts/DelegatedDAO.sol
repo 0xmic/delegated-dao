@@ -36,6 +36,9 @@ contract DelegatedDAO {
     /* @notice Investor address to proposal ID to vote weight cast on proposal */
     mapping(address => mapping(uint256 => int256)) public votesCast;
 
+    /* @notice Investor address to proposal ID to bool of independent votes cast */
+    mapping(address => mapping(uint256 => bool)) public hasVotedIndependently;
+
     /* @notice Delegator address to delegatee address */
     mapping(address => address) public delegatorDelegatee;
 
@@ -183,11 +186,21 @@ contract DelegatedDAO {
 
         // Remove delegator's votes from live proposals
         for(uint256 i = 1; i <= proposalCount; i++) {
-            // Check if the proposal is live, and the delegator has voted
-            if(proposals[i].status == ProposalStatus.Active && votesCast[msg.sender][i] > 0) {
-                votesCast[removedDelegatee][i] -= int(amount);
-                votesCast[msg.sender][i] -= int(amount);
-                proposals[i].votes -= int(amount);
+            // Check if the proposal is live, and the delegatee has voted
+            if(proposals[i].status == ProposalStatus.Active && votesCast[removedDelegatee][i] != 0) {
+                // Check if the delegator has not independently voted
+                if (!hasVotedIndependently[msg.sender][i]) {
+                    if(votesCast[removedDelegatee][i] > 0){
+                        proposals[i].votes -= int(amount);
+                    }else{
+                        proposals[i].votes += int(amount);
+                    }
+                }
+            }
+
+            // Reset delegator's voting record for each proposal
+            if (!hasVotedIndependently[msg.sender][i]) {
+                votesCast[msg.sender][i] = 0;
             }
         }
 
@@ -254,6 +267,8 @@ contract DelegatedDAO {
             }
         }
 
+        hasVotedIndependently[msg.sender][_id] = true;
+
         emit UpVote(_id, msg.sender);
     }
 
@@ -295,6 +310,8 @@ contract DelegatedDAO {
                 votesCast[delegator][_id] = -int(delegatorBalance[delegator]);
             }
         }
+
+        hasVotedIndependently[msg.sender][_id] = true;
 
         emit DownVote(_id, msg.sender);
     }
