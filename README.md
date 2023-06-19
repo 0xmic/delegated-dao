@@ -57,4 +57,5 @@ npx hardhat --network localhost scripts/2_seed.js
 npm run start
 ```
 
+## Diagram
 ![Delegated DAO](./public/delegated-dao.png)
