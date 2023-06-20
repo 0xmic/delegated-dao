@@ -41,21 +41,24 @@ const Propose = () => {
   const proposeHandler = async (e) => {
     e.preventDefault()
 
-    setShowAlert(false)
+    setShowAlert(false) // Reset showAlert
 
+    // Check if the recipient address is a valid Ethereum address.
     if (!ethers.utils.isAddress(recipient)) {
       setError('Invalid Ethereum address')
       return
     }
 
-    // reset error message when the address is valid
+    // Reset error message when the address is valid
     setError('')
 
+    // Dispatch the createProposal action
     createProposal(provider, delegatedDAO, title, description, amount, recipient, dispatch)
 
-    setShowAlert(true)
+    setShowAlert(true) // Show alert after proposing
   }
 
+  // Use the useEffect hook to reset form fields after proposing
   useEffect(() => {
     if (!isProposing && !error) {
       setTitle('')
@@ -70,6 +73,7 @@ const Propose = () => {
     <>
       <h1 className='text-center'>Create Proposal</h1>
 
+      {/* Display the DAO's rules and the DAO Treasury balance */}
       <p className='text-center'>
         DAO members can create new proposals to be voted on by the DAO.
         <br />
@@ -88,7 +92,9 @@ const Propose = () => {
 
       <Card style={{ maxWidth: '450px' }} className='mx-auto px-4'>
         {account && (balance > 0 || delegatorBalance > 0) ? (
+          // If the user is a DAO member, show the proposal creation form
           <Form key={formKey} onSubmit={proposeHandler}>
+            {/* Form fields: title, description, amount, recipient */}
             <Form.Group style={{ maxWidth: '450px', margin: '50px auto' }}>
               <Form.Control
                 type='text'
@@ -139,6 +145,7 @@ const Propose = () => {
             </Form.Group>
           </Form>
         ) : account ? (
+          // If the user is not a DAO member, display a message
           <p
             className='d-flex justify-content-center align-items-center'
             style={{ height: '300px' }}
@@ -146,6 +153,7 @@ const Propose = () => {
             Not a DAO member.
           </p>
         ) : (
+          // If no account is connected, ask the user to connect their wallet
           <p
             className='d-flex justify-content-center align-items-center'
             style={{ height: '300px' }}
@@ -156,6 +164,7 @@ const Propose = () => {
       </Card>
 
       {isProposing ? (
+        // If a proposal is currently being made, show a pending alert
         <Alert
           message={'Proposal Pending...'}
           transactionHash={null}
@@ -163,6 +172,7 @@ const Propose = () => {
           setShowAlert={setShowAlert}
         />
       ) : isProposingSuccess && showAlert ? (
+        // If the proposal was successfully made, show a success alert
         <Alert
           message={'Proposal Successful...'}
           transactionHash={isProposingTxnHash}
@@ -170,6 +180,7 @@ const Propose = () => {
           setShowAlert={setShowAlert}
         />
       ) : !isProposingSuccess && showAlert ? (
+        // If the proposal failed, show a failure alert
         <Alert
           message={'Proposal Failed...'}
           transactionHash={null}
@@ -177,9 +188,9 @@ const Propose = () => {
           setShowAlert={setShowAlert}
         />
       ) : (
+        // If there are no proposals, don't show an alert
         <></>
       )}
-
     </>
   )
 }

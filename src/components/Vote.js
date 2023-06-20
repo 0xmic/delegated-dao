@@ -50,6 +50,7 @@ const Vote = () => {
   useEffect(() => {
   }, [])
 
+  // Headers for table
   const headers = [
     '#',
     'Title',
@@ -125,13 +126,15 @@ const Vote = () => {
     setShowAlert(true)
   }
 
-  // Timestamp is in seconds, so convert it to milliseconds for JS
+  // Helper function for checking if a proposal has expired:
+  // timestamp is in seconds, so convert it to milliseconds for JS
   const isExpired = proposal =>
     Date.now() > proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000
 
   return (
     <>
       <h1 className='text-center'>Live Proposals</h1>
+      {/* Voting tab details and requirements, user info */}
       <p className='text-center'>
         DAO members can express support or opposition for proposals by 'Upvoting' or 'Downvoting',
         <br />
@@ -170,6 +173,7 @@ const Vote = () => {
 
       <hr />
 
+      {/* Proposals table */}
       <Table striped bordered hover responsive>
         <thead>
           <tr>
@@ -180,101 +184,115 @@ const Vote = () => {
         </thead>
         <tbody>
           {proposals.filter(proposal => Number(proposal.status) === 0).map((proposal, index) => {
+            // Define useful flags
             const isFinalized = proposal.status === 0 ? 0 : 1
             const canVote = parseFloat(delegateeVotesReceived) > 0 || parseFloat(balance) > 0
             const canFinalize = parseFloat(delegateeVotesReceived) > 0 || parseFloat(balance) > 0 || parseFloat(delegatorBalance) > 0
 
+            // Proposals table rows
             return (
               <tr key={index}>
-              <td className='text-center align-middle'>
-                {proposal.id.toString()}
-              </td>
-              <td className='text-center align-middle'>
-                {proposal.title.toString()}
-              </td>
-              <td className='text-center align-middle'>
-                {proposal.description.toString()}
-              </td>
-              <td className='text-center align-middle'>
-              {parseInt(ethers.utils.formatUnits(proposal.amount, 18).split('.')[0]).toLocaleString()} CT
-              </td>
-              <td style={{padding: 12}} className='d-flex align-items-center justify-content-center'>
-                <Blockies
-                  seed={proposal.recipient.toString()}
-                  size={10}
-                  scale={3}
-                  color='#e6e6e6'
-                  bgColor='#000000'
-                  spotColor='#ffffff'
-                  className="identicon mx-2"
-                />
-                <OverlayTrigger
-                  overlay={
-                    <Tooltip id={`tooltip-${index}`}>
-                      {proposal.recipient.toString()}
-                    </Tooltip>
-                  }
-                >
-                  <span>
-                    {proposal.recipient.toString().slice(0, 6) + '...' + proposal.recipient.toString().slice(-4)}
-                  </span>
-                </OverlayTrigger>
-              </td>
-              <td className='text-center align-middle'>
-                {parseInt(ethers.utils.formatEther(proposal.votes).split(".")[0]).toLocaleString()}
-              </td>
-              <td className='text-center align-middle'>
-                {isExpired(proposal) && Number(proposal.status) === 0 ? 'Expired' : mapStatus(proposal.status)}
-              </td>
-              <td className='text-center align-middle'>
-              {!isFinalized && canVote && !userVotes[proposal.id] &&
-                Date.now() < proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000 && (
-                loadingUpVoteId === proposal.id ?
-                  <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} /> :
-                  <Button variant='primary' style={{ width: '100%' }} onClick={(e) => upVoteHandler(e, proposal.id)}>
-                    👍
-                  </Button>
-              )}
-              </td>
-              <td className='text-center align-middle'>
-                {!isFinalized && canVote && !userVotes[proposal.id] &&
-                  Date.now() < proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000 && (
-                  loadingDownVoteId === proposal.id ?
-                    <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} /> :
-                    <Button variant='primary' style={{ width: '100%' }} onClick={(e) => downVoteHandler(e, proposal.id)}>
-                      👎
-                    </Button>
-                )}
-              </td>
-              <td className='text-center align-middle'>
-                {!isFinalized && canFinalize &&
-                  parseFloat(ethers.utils.formatUnits(proposal.votes, 18).toString()) >=  quorum &&
-                  parseFloat(ethers.utils.formatUnits(proposal.amount, 18).toString()) <= parseFloat(daoBalance.toString()) &&
-                  Date.now() < proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000 && (
-                  loadingFinalizeId === proposal.id ?
-                    <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} /> :
-                    <Button variant='primary' style={{ width: '100%' }} onClick={(e) => finalizeHandler(e, proposal.id)}>
-                      ✅
-                    </Button>
-                )}
-                {!isFinalized && canFinalize &&
-                  Date.now() >= proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000 && (
-                  loadingFinalizeId === proposal.id ?
-                    <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} /> :
-                    <Button variant='primary' style={{ width: '100%' }} onClick={(e) => finalizeHandler(e, proposal.id)}>
-                      ❌
-                    </Button>
-                )}
-              </td>
-              <td className='text-center align-middle'>
-                {new Date(proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000).toLocaleString()}
-              </td>
-            </tr>
+                <td className='text-center align-middle'>
+                  {/* ID */}
+                  {proposal.id.toString()}
+                </td>
+                <td className='text-center align-middle'>
+                  {/* Title */}
+                  {proposal.title.toString()}
+                </td>
+                <td className='text-center align-middle'>
+                  {/* Description */}
+                  {proposal.description.toString()}
+                </td>
+                <td className='text-center align-middle'>
+                  {/* Amount */}
+                  {parseInt(ethers.utils.formatUnits(proposal.amount, 18).split('.')[0]).toLocaleString()} CT
+                </td>
+                <td style={{padding: 12}} className='d-flex align-items-center justify-content-center'>
+                  {/* Recipient */}
+                  <Blockies
+                    seed={proposal.recipient.toString()}
+                    size={10}
+                    scale={3}
+                    color='#e6e6e6'
+                    bgColor='#000000'
+                    spotColor='#ffffff'
+                    className="identicon mx-2"
+                  />
+                  <OverlayTrigger
+                    overlay={
+                      <Tooltip id={`tooltip-${index}`}>
+                        {proposal.recipient.toString()}
+                      </Tooltip>
+                    }
+                  >
+                    <span>
+                      {proposal.recipient.toString().slice(0, 6) + '...' + proposal.recipient.toString().slice(-4)}
+                    </span>
+                  </OverlayTrigger>
+                </td>
+                <td className='text-center align-middle'>
+                  {/* Votes */}
+                  {parseInt(ethers.utils.formatEther(proposal.votes).split(".")[0]).toLocaleString()}
+                </td>
+                <td className='text-center align-middle'>
+                  {/* Status */}
+                  {isExpired(proposal) && Number(proposal.status) === 0 ? 'Expired' : mapStatus(proposal.status)}
+                </td>
+                <td className='text-center align-middle'>
+                  {/* Upvote */}
+                  {!isFinalized && canVote && !userVotes[proposal.id] &&
+                    Date.now() < proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000 && (
+                    loadingUpVoteId === proposal.id ?
+                      <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} /> :
+                      <Button variant='primary' style={{ width: '100%' }} onClick={(e) => upVoteHandler(e, proposal.id)}>
+                        👍
+                      </Button>
+                  )}
+                </td>
+                <td className='text-center align-middle'>
+                  {/* Downvote */}
+                  {!isFinalized && canVote && !userVotes[proposal.id] &&
+                    Date.now() < proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000 && (
+                    loadingDownVoteId === proposal.id ?
+                      <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} /> :
+                      <Button variant='primary' style={{ width: '100%' }} onClick={(e) => downVoteHandler(e, proposal.id)}>
+                        👎
+                      </Button>
+                  )}
+                </td>
+                <td className='text-center align-middle'>
+                  {/* Finalize */}
+                  {!isFinalized && canFinalize &&
+                    parseFloat(ethers.utils.formatUnits(proposal.votes, 18).toString()) >=  quorum &&
+                    parseFloat(ethers.utils.formatUnits(proposal.amount, 18).toString()) <= parseFloat(daoBalance.toString()) &&
+                    Date.now() < proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000 && (
+                    loadingFinalizeId === proposal.id ?
+                      <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} /> :
+                      <Button variant='primary' style={{ width: '100%' }} onClick={(e) => finalizeHandler(e, proposal.id)}>
+                        ✅
+                      </Button>
+                  )}
+                  {!isFinalized && canFinalize &&
+                    Date.now() >= proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000 && (
+                    loadingFinalizeId === proposal.id ?
+                      <Spinner animation='border' style={{ display: 'block', margin: '0 auto' }} /> :
+                      <Button variant='primary' style={{ width: '100%' }} onClick={(e) => finalizeHandler(e, proposal.id)}>
+                        ❌
+                      </Button>
+                  )}
+                </td>
+                <td className='text-center align-middle'>
+                  {/* Deadline */}
+                  {new Date(proposal.timestamp.add(ethers.BigNumber.from(votingPeriodHours * 3600)).toNumber() * 1000).toLocaleString()}
+                </td>
+              </tr>
             )
           })}
         </tbody>
       </Table>
 
+      {/* Display Alerts based on the Voting/Finalizing Status */}
       {isUpVoting ? (
         <Alert
           message={'Up Vote Pending...'}

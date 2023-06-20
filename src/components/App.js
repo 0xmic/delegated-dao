@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux'
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import { Container } from 'react-bootstrap'
 
-// Components
+// Components used in Routes
 import Navigation from './Navigation';
 import Tabs from './Tabs';
 import Propose from './Propose';
@@ -21,23 +21,26 @@ import {
 } from '../store/interactions'
 
 function App() {
+  // Fetch the dispatch function from Redux to allow dispatching actions to the store.
   const dispatch = useDispatch()
 
   const loadBlockchainData = async () => {
-    // Initiate provider
+    // Initiate Ethereum provider to interact with the Ethereum blockchain
     const provider = await loadProvider(dispatch)
 
-    // Fetch current network's chainId (e.g. hardhat = 31337, mainnet = 1, sepolia = 11155111)
+    // Fetch current network's chainId (Ethereum network ID)
     const chainId = await loadNetwork(provider, dispatch)
 
-    // Reload page when network changes
+    // Listener to handle network changes. Reload the page when network changes
     window.ethereum.on('chainChanged', () => {
       window.location.reload()
     })
 
-    // Fetch current account from Metamask when changed
+    // Listener to handle account changes. Reload the page when the user changes their account in Metamask
     window.ethereum.on('accountsChanged', async (accounts) => {
+      // Fetch the current account from Metamask
       await loadAccount(dispatch)
+      // Reload the page to reflect account change
       window.location.reload()
     })
 
@@ -48,19 +51,24 @@ function App() {
     await loadDelegatedDAO(provider, chainId, dispatch)
   }
 
+  // Use useEffect to run loadBlockchainData function once after the component is mounted
   useEffect(() => {
     loadBlockchainData()
   }, []);
 
   return(
+      // Wrap everything inside a Bootstrap Container for center alignment and padding
     <Container>
+      {/* Use HashRouter for routing */}
       <HashRouter>
+
         <Navigation />
 
         <hr />
 
         <Tabs />
 
+        {/* Define Routes for each component */}
         <Routes>
           <Route exact path="/" element={<Propose />} />
           <Route exact path="/delegate" element={<Delegate />} />

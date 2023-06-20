@@ -76,6 +76,7 @@ const Delegate = () => {
     setShowAlert(true)
   }
 
+  // Handle UI updates based on the delegation status
   useEffect(() => {
     if (!isDelegating && !error) {
       setDelegate('')
@@ -87,6 +88,7 @@ const Delegate = () => {
     <>
       <h1 className='text-center'>Delegate Votes</h1>
 
+      {/* Delegation tab overview and details on the user's current voting power */}
       <p className='text-center'>
         DAO members may delegate their voting power to another DAO member to vote on their behalf.
         <br />
@@ -110,12 +112,10 @@ const Delegate = () => {
 
       <hr />
 
-      {
-        (Number(balance) > 0 && Number(delegateeVotesReceived) === 0 && Number(delegatorBalance) === 0) ?
-      (
+      {/* Depending on the User's current state, render the appropriate options - Delegate, Undelegate, None */}
+      {(Number(balance) > 0 && Number(delegateeVotesReceived) === 0 && Number(delegatorBalance) === 0) ? (
         <>
           {/* User is investor, has not received delegation, and has not delegated their votes - allow Delegation */}
-
           <Card style={{ maxWidth: '450px' }} className='mx-auto px-4'>
             <Form key={formKey} onSubmit={delegateHandler}>
               <Form.Group style={{ maxWidth: '450px', margin: '50px auto' }}>
@@ -143,7 +143,6 @@ const Delegate = () => {
       ) : Number(delegatorBalance) > 0 ? (
         <>
           {/* User has delegated - allow Undelegation*/}
-
           <Table striped bordered hover responsive>
             <thead>
               <tr>
@@ -187,7 +186,6 @@ const Delegate = () => {
       ) : Number(delegateeVotesReceived) > 0 ? (
         <>
           {/* User is delegatee - no delegation allowed */}
-
           <Card style={{ maxWidth: '450px' }} className='mx-auto px-4'>
             <p
               className='d-flex flex-column justify-content-center align-items-center text-center'
@@ -226,7 +224,6 @@ const Delegate = () => {
       ) : (
         <>
           {/* No user connected to site */}
-
           <Card style={{ maxWidth: '450px' }} className='mx-auto px-4'>
             <p
               className='d-flex justify-content-center align-items-center text-center'
@@ -238,14 +235,15 @@ const Delegate = () => {
         </>
       )}
 
-      {isDelegating ?
+      {/* Display Alerts based on the Delegation/Undelegation Status */}
+      {isDelegating ? (
          <Alert
           message={'Delegation Pending...'}
           transactionHash={null}
           variant={'info'}
           setShowAlert={setShowAlert}
         />
-      : isUndelegating ? (
+      ) : isUndelegating ? (
         <Alert
           message={'Undelegation Pending...'}
           transactionHash={null}

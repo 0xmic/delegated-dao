@@ -32,6 +32,7 @@ const Navigation = () => {
   const dispatch = useDispatch()
 
   const connectHandler = async () => {
+    // Load the necessary data from the blockchain.
     const account = await loadAccount(dispatch)
     const balance = await loadBalance(token, account, dispatch)
     const daoBalance = await loadDAOBalance(token, delegatedDAO, delegatedDAO.address, dispatch)
@@ -46,6 +47,7 @@ const Navigation = () => {
   }
 
   const networkHandler = async (e) => {
+    // Use the Ethereum provider's request method to switch to the selected Ethereum network.
     await window.ethereum.request({
       method: 'wallet_switchEthereumChain',
       params: [{ chainId: e.target.value }]
@@ -59,6 +61,7 @@ const Navigation = () => {
       <Navbar.Brand href='#'>Crypto Token (CT) Delegated DAO</Navbar.Brand>
 
       <Navbar.Toggle aria-controls="nav" />
+
       <Navbar.Collapse id='nav' className='justify-content-end'>
 
         <div className="d-flex justify-content-end mt-3">
@@ -75,6 +78,7 @@ const Navigation = () => {
             <option value='0x13881'>Mumbai</option>
           </Form.Select>
 
+          {/* If the account is already connected, show the address and the Blockies avatar */}
           {account ? (
             <Navbar.Text className="d-flex align-items-center">
               {account.slice(0, 5) + '...' + account.slice(-4)}
@@ -89,6 +93,7 @@ const Navigation = () => {
               />
             </Navbar.Text>
           ) : (
+            // If the account is not connected, show the Connect button
             <Button onClick={connectHandler}>Connect</Button>
           )}
 
