@@ -9,18 +9,18 @@
   },
   "11155111": {
     "token": {
-      "address": ""
+      "address": "0x3B77F2d91948Cc1cd840DC30F892B30b88096081"
     },
     "delegatedDAO": {
-      "address": ""
+      "address": "0xE22CA5742eb80B7a12b762F66F146E92Df04BAc4"
     }
   },
   "80001": {
     "token": {
-      "address": ""
+      "address": "0x1893F5B1B9ae48e7Ce441C32483C562703ACa7E9"
     },
     "delegatedDAO": {
-      "address": ""
+      "address": "0x23de8Eb986C5b3447213256e9553Ce1d7f757cFD"
     }
   }
 }
