@@ -35,16 +35,6 @@ Smart Contract Libraries:
 Smart Contract and Testing Environment:
 * [Hardhat](https://hardhat.org/)
 
-### Proposal Life Cycle
-1. Deploy Token and DelegatedDAO contracts
-2. Seed Investors and DAO with Tokens
-3. (Un)Delegate Votes
-4. Create Proposals
-5. Vote on Proposals
-6. Finalize Proposals:
-- If quorum reached, proposal is finalized as Passed and funds are distributed
-- If proposal expired, it is finalized as failed and no funds are distributed
-
 ## Local Testing
 To test the Crowdsale locally, run the following:
 ```shell
@@ -56,6 +46,16 @@ npx hardhat --network localhost scripts/2_seed.js
 
 npm run start
 ```
+
+## Proposal Life Cycle
+1. Deploy Token and DelegatedDAO contracts
+2. Seed Investors and DAO with Tokens
+3. (Un)Delegate Votes
+4. Create Proposals
+5. Vote on Proposals
+6. Finalize Proposals:
+- If quorum reached, proposal is finalized as Passed and funds are distributed
+- If proposal expired, it is finalized as failed and no funds are distributed
 
 ## Delegated DAO Overview
 ![Delegated DAO](./public/delegated-dao.png)

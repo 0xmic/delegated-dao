@@ -157,10 +157,14 @@ contract DelegatedDAO {
             // Check if the proposal is live, the delegatee has voted, and the delegator has not
             if (
                 proposals[i].status == ProposalStatus.Active &&
-                votesCast[_delegatee][i] > 0 &&
+                votesCast[_delegatee][i] != 0 &&  // Covers both upvotes and downvotes
                 votesCast[msg.sender][i] == 0
             ){
-                proposals[i].votes += int(amount);
+                if (votesCast[_delegatee][i] > 0) {
+                    proposals[i].votes += int(amount);
+                } else {
+                    proposals[i].votes -= int(amount);
+                }
             }
         }
 
