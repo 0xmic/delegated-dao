@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useCallback } from 'react'
 import { useDispatch } from 'react-redux'
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import { Container } from 'react-bootstrap'
@@ -24,7 +24,7 @@ function App() {
   // Fetch the dispatch function from Redux to allow dispatching actions to the store.
   const dispatch = useDispatch()
 
-  const loadBlockchainData = async () => {
+  const loadBlockchainData = useCallback(async () => {
     // Initiate Ethereum provider to interact with the Ethereum blockchain
     const provider = await loadProvider(dispatch)
 
@@ -49,12 +49,12 @@ function App() {
 
     // Fetch DAO contract
     await loadDelegatedDAO(provider, chainId, dispatch)
-  }
+  }, [dispatch]);
 
   // Use useEffect to run loadBlockchainData function once after the component is mounted
   useEffect(() => {
     loadBlockchainData()
-  }, []);
+  }, [loadBlockchainData]);
 
   return(
       // Wrap everything inside a Bootstrap Container for center alignment and padding

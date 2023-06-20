@@ -34,16 +34,16 @@ const Navigation = () => {
   const connectHandler = async () => {
     // Load the necessary data from the blockchain.
     const account = await loadAccount(dispatch)
-    const balance = await loadBalance(token, account, dispatch)
-    const daoBalance = await loadDAOBalance(token, delegatedDAO, delegatedDAO.address, dispatch)
-    const delegatorDelegatee = await loadDelegatorDelegatee(delegatedDAO, account, dispatch)
-    const delegatorBalance = await loadDelegatorBalance(delegatedDAO, account, dispatch)
-    const delegateeVotesReceived = await loadDelegateeVotesReceived(delegatedDAO, account, dispatch)
-    const votingPeriodHours = await loadVotingPeriodHours(delegatedDAO, dispatch)
-    const quorum = await loadQuorum(delegatedDAO, dispatch)
-    const proposals = await loadProposals(delegatedDAO, dispatch)
-    const userVotes = await loadUserVotes(delegatedDAO, account, dispatch)
-    const delegatees = await loadDelegatees(provider, delegatedDAO, dispatch)
+    await loadBalance(token, account, dispatch)
+    await loadDAOBalance(token, delegatedDAO, delegatedDAO.address, dispatch)
+    await loadDelegatorDelegatee(delegatedDAO, account, dispatch)
+    await loadDelegatorBalance(delegatedDAO, account, dispatch)
+    await loadDelegateeVotesReceived(delegatedDAO, account, dispatch)
+    await loadVotingPeriodHours(delegatedDAO, dispatch)
+    await loadQuorum(delegatedDAO, dispatch)
+    await loadProposals(delegatedDAO, dispatch)
+    await loadUserVotes(delegatedDAO, account, dispatch)
+    await loadDelegatees(provider, delegatedDAO, dispatch)
   }
 
   const networkHandler = async (e) => {
