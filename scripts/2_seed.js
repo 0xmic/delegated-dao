@@ -29,7 +29,6 @@ async function main() {
   const investorDelegate3 = accounts[9]
   const investorDelegate4 = accounts[10]
   const recipient = accounts[11]
-  const user = accounts[12]
   console.log(`Accounts fetched`)
 
   // Fetch Network
