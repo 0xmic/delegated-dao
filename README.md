@@ -1,5 +1,5 @@
 # Crypto Token (CT) DAO with Delegated Voting
-This project demonstrates a secure, full stack Decentralized Autonomous Organization governed by an ERC-20 token. The DAO contract manages proposal creation, delegation, voting, and distribution of funds held by the DAO treasury. The DAO leverages the Ethereum blockchain to ensure transparency and democratised control over funds distribution.
+This project demonstrates a secure, full stack Decentralized Autonomous Organization governed by an ERC-20 token. The DAO contract manages proposal creation, delegation, voting, and distribution of funds held by the DAO treasury. The DAO leverages the Ethereum blockchain to ensure transparency and democratized control over funds distribution.
 
 ## Features
 - Creation and voting on proposals by token holders
